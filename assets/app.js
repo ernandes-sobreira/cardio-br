@@ -1,8 +1,7 @@
 /* Painel Doenças Cardíacas — CSV wide (municípios x colunas ano/mês)
-   - Lê ISO-8859-1 (Latin-1) com TextDecoder
-   - Transforma para estrutura long em memória
-   - Filtros: ano, mês, municípios (multi)
-   - Gráficos Plotly: mensal (no ano) + anual (série histórica)
+   Atualizações:
+   - Se mês != ALL -> mostra SÉRIE HISTÓRICA do mês ao longo dos anos (comparação)
+   - Downloads: PNG dos gráficos + CSV dos dados filtrados
 */
 
 const CSV_PATH = "assets/data/dados-cardio-br-mes-ano-mod.csv";
@@ -33,7 +32,7 @@ let UI = {
 
 function fmtInt(n){
   if (n === null || n === undefined || Number.isNaN(n)) return "—";
-  return new Intl.NumberFormat("pt-BR").format(n);
+  return new Intl.NumberFormat("pt-BR").format(Math.round(n));
 }
 
 function normalizeMun(s){
@@ -41,7 +40,6 @@ function normalizeMun(s){
 }
 
 function parseHeaderToYearMonth(h){
-  // exemplo: "2007/Jan"
   const m = /^(\d{4})\/([A-Za-zÀ-ÿ]{3})$/.exec((h || "").trim());
   if (!m) return null;
   const year = Number(m[1]);
@@ -55,16 +53,13 @@ async function fetchCsvLatin1(path){
   const res = await fetch(path, { cache: "no-store" });
   if (!res.ok) throw new Error(`Falha ao carregar CSV (${res.status})`);
   const buf = await res.arrayBuffer();
-  const text = new TextDecoder("iso-8859-1").decode(buf);
-  return text;
+  return new TextDecoder("iso-8859-1").decode(buf);
 }
 
 function coerceValue(v){
-  // no seu CSV aparecem "-" e números
   if (v === null || v === undefined) return 0;
   const s = v.toString().trim();
   if (!s || s === "-" ) return 0;
-  // troca vírgula por ponto se vier assim
   const num = Number(s.replace(",", "."));
   return Number.isFinite(num) ? num : 0;
 }
@@ -72,7 +67,6 @@ function coerceValue(v){
 function buildData(parsed){
   const rows = parsed.data.filter(r => r && Object.keys(r).length > 0);
 
-  // Descobrir colunas de tempo (ano/mês)
   const allHeaders = parsed.meta.fields || [];
   const timeCols = [];
   for (const h of allHeaders){
@@ -224,13 +218,24 @@ function valueForMunYearMonth(mun, year, month){
   return mMap.get(month) || 0;
 }
 
+function munsForCharts(){
+  const chosen = UI.selectedMuns.size ? Array.from(UI.selectedMuns) : [];
+  if (chosen.length) return chosen;
+
+  // sem seleção -> top 5 no ano atual (para ficar útil)
+  const year = UI.year;
+  return DATA.muns
+    .map(m => [m, sumForMunYear(m, year)])
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0, 5)
+    .map(x=>x[0]);
+}
+
 function computeTotalsForFilter(){
   const year = UI.year;
   const month = UI.month;
 
   const selected = UI.selectedMuns.size ? Array.from(UI.selectedMuns) : [];
-
-  // se nada selecionado, calcula total Brasil (soma de todos) no filtro
   const munsToUse = selected.length ? selected : DATA.muns;
 
   let total = 0;
@@ -254,38 +259,9 @@ function computeTotalsForFilter(){
   return { total, topMun, topVal, countSelected: selected.length };
 }
 
-function plotMonthly(){
-  const year = UI.year;
-  const chosen = UI.selectedMuns.size ? Array.from(UI.selectedMuns) : [];
-
-  // se ninguém selecionado, pega os 5 maiores do ano pra dar um gráfico útil
-  let muns = chosen;
-  if (!muns.length){
-    const ranked = DATA.muns
-      .map(m => [m, sumForMunYear(m, year)])
-      .sort((a,b)=>b[1]-a[1])
-      .slice(0, 5)
-      .map(x=>x[0]);
-    muns = ranked;
-  }
-
-  const traces = muns.map(mun => {
-    const x = [];
-    const y = [];
-    for (let m = 1; m <= 12; m++){
-      x.push(monthName[m]);
-      y.push(valueForMunYearMonth(mun, year, m));
-    }
-    return {
-      type: "scatter",
-      mode: "lines+markers",
-      name: mun,
-      x, y
-    };
-  });
-
-  const layout = {
-    margin: { l: 50, r: 10, t: 10, b: 40 },
+function basePlotlyLayout(){
+  return {
+    margin: { l: 55, r: 12, t: 10, b: 42 },
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
     font: { color: "rgba(255,255,255,.88)" },
@@ -293,64 +269,98 @@ function plotMonthly(){
     yaxis: { gridcolor: "rgba(255,255,255,.08)" },
     legend: { orientation: "h" }
   };
-
-  Plotly.newPlot("chartMonthly", traces, layout, { responsive: true, displayModeBar: false });
 }
 
-function plotYearly(){
-  const chosen = UI.selectedMuns.size ? Array.from(UI.selectedMuns) : [];
+/* GRÁFICO 1:
+   - month=ALL -> meses no ano selecionado
+   - month!=ALL -> mês selecionado ao longo dos anos
+*/
+function plotPrimary(){
+  const year = UI.year;
+  const month = UI.month;
+  const muns = munsForCharts();
 
-  // Se nada selecionado, usar top 5 no ano atual (coerente com o mensal)
-  let muns = chosen;
-  if (!muns.length){
-    const year = UI.year;
-    muns = DATA.muns
-      .map(m => [m, sumForMunYear(m, year)])
-      .sort((a,b)=>b[1]-a[1])
-      .slice(0, 5)
-      .map(x=>x[0]);
+  if (month === "ALL"){
+    el("titleMonthly").textContent = `Evolução mensal (${year})`;
+    const traces = muns.map(mun => {
+      const x = [];
+      const y = [];
+      for (let m = 1; m <= 12; m++){
+        x.push(monthName[m]);
+        y.push(valueForMunYearMonth(mun, year, m));
+      }
+      return { type: "scatter", mode: "lines+markers", name: mun, x, y };
+    });
+
+    const layout = basePlotlyLayout();
+    Plotly.newPlot("chartMonthly", traces, layout, { responsive: true, displayModeBar: false });
+    return;
   }
+
+  const m = Number(month);
+  el("titleMonthly").textContent = `Série histórica do mês (${monthName[m]}) — ${DATA.range.minYear}→${DATA.range.maxYear}`;
 
   const traces = muns.map(mun => {
     const x = DATA.years;
-    const y = DATA.years.map(y => sumForMunYear(mun, y));
+    const y = DATA.years.map(y => valueForMunYearMonth(mun, y, m));
+    return { type: "scatter", mode: "lines+markers", name: mun, x, y };
+  });
+
+  const layout = basePlotlyLayout();
+  Plotly.newPlot("chartMonthly", traces, layout, { responsive: true, displayModeBar: false });
+}
+
+/* GRÁFICO 2:
+   - month=ALL -> série anual (totais por ano)
+   - month!=ALL -> barras por ano do mês selecionado (comparação)
+*/
+function plotSecondary(){
+  const month = UI.month;
+  const muns = munsForCharts();
+
+  if (month === "ALL"){
+    el("titleYearly").textContent = "Série histórica anual (totais por ano)";
+    const traces = muns.map(mun => {
+      const x = DATA.years;
+      const y = DATA.years.map(y => sumForMunYear(mun, y));
+      return { type: "bar", name: mun, x, y };
+    });
+
+    const layout = basePlotlyLayout();
+    layout.barmode = "group";
+    Plotly.newPlot("chartYearly", traces, layout, { responsive: true, displayModeBar: false });
+    return;
+  }
+
+  const m = Number(month);
+  el("titleYearly").textContent = `Comparação por ano — mês (${monthName[m]})`;
+  const traces = muns.map(mun => {
+    const x = DATA.years;
+    const y = DATA.years.map(y => valueForMunYearMonth(mun, y, m));
     return { type: "bar", name: mun, x, y };
   });
 
-  const layout = {
-    barmode: "group",
-    margin: { l: 50, r: 10, t: 10, b: 40 },
-    paper_bgcolor: "rgba(0,0,0,0)",
-    plot_bgcolor: "rgba(0,0,0,0)",
-    font: { color: "rgba(255,255,255,.88)" },
-    xaxis: { gridcolor: "rgba(255,255,255,.08)" },
-    yaxis: { gridcolor: "rgba(255,255,255,.08)" },
-    legend: { orientation: "h" }
-  };
-
+  const layout = basePlotlyLayout();
+  layout.barmode = "group";
   Plotly.newPlot("chartYearly", traces, layout, { responsive: true, displayModeBar: false });
 }
 
 function refreshKPIs(){
   const { total, topMun, topVal, countSelected } = computeTotalsForFilter();
-
   el("kpiTotal").textContent = fmtInt(total);
   el("kpiTop").textContent = topMun ? `${topMun} (${fmtInt(topVal)})` : "—";
   el("kpiSel").textContent = fmtInt(countSelected);
-
-  const pill = el("pillStatus");
-  pill.textContent = "Dados carregados";
+  el("pillStatus").textContent = "Dados carregados";
 }
 
 function refreshAll(){
   refreshKPIs();
-  plotMonthly();
-  plotYearly();
+  plotPrimary();
+  plotSecondary();
 }
 
 function wireActions(){
-  const search = el("munSearch");
-  search.addEventListener("input", () => renderMunList(search.value));
+  el("munSearch").addEventListener("input", () => renderMunList(el("munSearch").value));
 
   el("btnClear").addEventListener("click", () => {
     UI.selectedMuns.clear();
@@ -370,6 +380,114 @@ function wireActions(){
     renderMunList(el("munSearch").value);
     refreshAll();
   });
+
+  // Download PNGs
+  el("btnDlMonthly").addEventListener("click", async () => {
+    try{
+      await Plotly.downloadImage("chartMonthly", {
+        format: "png",
+        filename: makeFileBase("grafico_1")
+      });
+    }catch(e){ alert("Não foi possível baixar o PNG do gráfico 1."); }
+  });
+
+  el("btnDlYearly").addEventListener("click", async () => {
+    try{
+      await Plotly.downloadImage("chartYearly", {
+        format: "png",
+        filename: makeFileBase("grafico_2")
+      });
+    }catch(e){ alert("Não foi possível baixar o PNG do gráfico 2."); }
+  });
+
+  // Download dados filtrados
+  el("btnDownloadData").addEventListener("click", () => {
+    const csv = buildFilteredCSV();
+    downloadText(csv, `${makeFileBase("dados")}.csv`, "text/csv;charset=utf-8;");
+  });
+}
+
+function makeFileBase(prefix){
+  const y = UI.year ?? "ano";
+  const m = UI.month === "ALL" ? "todos_meses" : monthName[Number(UI.month)].toLowerCase();
+  const selN = UI.selectedMuns.size ? `${UI.selectedMuns.size}mun` : "sem_selecao";
+  return `${prefix}_cardio_${y}_${m}_${selN}`.replace(/\s+/g,"_");
+}
+
+function buildFilteredLongRows(){
+  const year = UI.year;
+  const month = UI.month;
+
+  const muns = UI.selectedMuns.size ? Array.from(UI.selectedMuns) : DATA.muns;
+
+  const rows = [];
+
+  if (month === "ALL"){
+    // dados do ANO selecionado (12 meses)
+    for (const mun of muns){
+      for (let m = 1; m <= 12; m++){
+        rows.push({
+          municipio: mun,
+          ano: year,
+          mes: monthName[m],
+          valor: valueForMunYearMonth(mun, year, m)
+        });
+      }
+    }
+    return rows;
+  }
+
+  // dados do MÊS selecionado ao longo de TODOS os anos
+  const mm = Number(month);
+  for (const mun of muns){
+    for (const y of DATA.years){
+      rows.push({
+        municipio: mun,
+        ano: y,
+        mes: monthName[mm],
+        valor: valueForMunYearMonth(mun, y, mm)
+      });
+    }
+  }
+  return rows;
+}
+
+function buildFilteredCSV(){
+  const rows = buildFilteredLongRows();
+  const header = ["municipio","ano","mes","valor"];
+  const lines = [header.join(";")];
+
+  for (const r of rows){
+    lines.push([
+      safeCSV(r.municipio),
+      r.ano,
+      r.mes,
+      String(r.valor).replace(".", ",")
+    ].join(";"));
+  }
+
+  return lines.join("\n");
+}
+
+function safeCSV(s){
+  const t = (s ?? "").toString();
+  // se tiver ; ou " ou quebra de linha, encapsula
+  if (/[;"\n\r]/.test(t)){
+    return `"${t.replace(/"/g,'""')}"`;
+  }
+  return t;
+}
+
+function downloadText(text, filename, mime){
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 async function boot(){
@@ -382,19 +500,13 @@ async function boot(){
       skipEmptyLines: true
     });
 
-    if (parsed.errors && parsed.errors.length){
-      console.warn(parsed.errors);
-    }
-
     buildData(parsed);
 
     initYearMonthControls();
     wireActions();
     renderMunList("");
 
-    // estado inicial: nenhum município selecionado (mostra top 5 automaticamente nos gráficos)
     refreshAll();
-
     el("pillStatus").textContent = "Dados carregados";
   } catch (err){
     console.error(err);
