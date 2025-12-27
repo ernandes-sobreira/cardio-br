@@ -23,13 +23,16 @@
       <div class="logo">❤</div>
       <div>
         <div class="title">Painel de Doenças Cardíacas</div>
-        <div class="subtitle">Por ano, mês e município — com comparação</div>
+        <div class="subtitle">
+          Por ano, mês e município — com comparação
+          <span class="credits">• Elaborado por Ernandes Sobreira; Letícia Zen para análises científicas e políticas públicas. Dados DATASUS 2025.</span>
+        </div>
       </div>
     </div>
 
     <div class="meta">
       <span class="pill" id="pillStatus">Carregando dados…</span>
-      <span class="pill ghost" id="pillFonte">Fonte: seu CSV</span>
+      <span class="pill ghost" id="pillFonte">Fonte: DATASUS (via CSV)</span>
     </div>
   </header>
 
@@ -86,6 +89,10 @@
         </div>
       </div>
 
+      <div class="row" style="padding-bottom:12px">
+        <button class="btn accent" id="btnDownloadData">Baixar dados (CSV)</button>
+      </div>
+
       <div class="footerNote">
         <div class="small muted" id="rangeInfo">—</div>
       </div>
@@ -95,12 +102,18 @@
       <h2>Gráficos</h2>
 
       <div class="chartWrap">
-        <div class="chartTitle">Evolução mensal (ano selecionado)</div>
+        <div class="chartHead">
+          <div class="chartTitle" id="titleMonthly">—</div>
+          <button class="btn smallbtn" id="btnDlMonthly">Baixar PNG</button>
+        </div>
         <div id="chartMonthly" class="chart"></div>
       </div>
 
       <div class="chartWrap">
-        <div class="chartTitle">Série histórica anual (comparação)</div>
+        <div class="chartHead">
+          <div class="chartTitle" id="titleYearly">—</div>
+          <button class="btn smallbtn" id="btnDlYearly">Baixar PNG</button>
+        </div>
         <div id="chartYearly" class="chart"></div>
       </div>
     </section>
@@ -108,7 +121,7 @@
 
   <footer class="foot">
     <div class="small muted">
-      Dica: publique no GitHub Pages (Settings → Pages → Deploy from branch → main / root).
+      © Painel local (GitHub Pages) — uso educacional, científico e apoio a políticas públicas.
     </div>
   </footer>
 </body>
