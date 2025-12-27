@@ -25,7 +25,9 @@
         <div class="title">Painel de Doenças Cardíacas</div>
         <div class="subtitle">
           Por ano, mês e município — com comparação
-          <span class="credits">• Elaborado por Ernandes Sobreira; Letícia Zen para análises científicas e políticas públicas. Dados DATASUS 2025.</span>
+          <span class="credits">
+            • Elaborado por Ernandes Sobreira; Letícia Zen para análises científicas e políticas públicas. Dados DATASUS 2025.
+          </span>
         </div>
       </div>
     </div>
@@ -37,6 +39,7 @@
   </header>
 
   <main class="grid">
+    <!-- CONTROLES -->
     <section class="card controls">
       <h2>Filtros</h2>
 
@@ -55,7 +58,12 @@
       <div class="row">
         <label class="field grow">
           <span>Buscar município</span>
-          <input id="munSearch" type="search" placeholder="Digite para filtrar (ex: Cáceres, Cuiabá…)" autocomplete="off" />
+          <input
+            id="munSearch"
+            type="search"
+            placeholder="Digite para filtrar (ex: Cáceres, Cuiabá…)"
+            autocomplete="off"
+          />
         </label>
 
         <div class="hint">
@@ -67,8 +75,8 @@
         <div class="munHeader">
           <span class="small muted" id="munCount">0 municípios</span>
           <div class="munActions">
-            <button class="btn" id="btnSelectTop">Top 5 no ano</button>
-            <button class="btn ghost" id="btnClear">Limpar</button>
+            <button class="btn" id="btnSelectTop" type="button">Top 5 no ano</button>
+            <button class="btn ghost" id="btnClear" type="button">Limpar</button>
           </div>
         </div>
         <div id="munList" class="munList" aria-label="Lista de municípios"></div>
@@ -90,7 +98,7 @@
       </div>
 
       <div class="row" style="padding-bottom:12px">
-        <button class="btn accent" id="btnDownloadData">Baixar dados (CSV)</button>
+        <button class="btn accent" id="btnDownloadData" type="button">Baixar dados (CSV)</button>
       </div>
 
       <div class="footerNote">
@@ -98,13 +106,14 @@
       </div>
     </section>
 
+    <!-- GRÁFICOS -->
     <section class="card charts">
       <h2>Gráficos</h2>
 
       <div class="chartWrap">
         <div class="chartHead">
           <div class="chartTitle" id="titleMonthly">—</div>
-          <button class="btn smallbtn" id="btnDlMonthly">Baixar PNG</button>
+          <button class="btn smallbtn" id="btnDlMonthly" type="button">Baixar PNG</button>
         </div>
         <div id="chartMonthly" class="chart"></div>
       </div>
@@ -112,7 +121,7 @@
       <div class="chartWrap">
         <div class="chartHead">
           <div class="chartTitle" id="titleYearly">—</div>
-          <button class="btn smallbtn" id="btnDlYearly">Baixar PNG</button>
+          <button class="btn smallbtn" id="btnDlYearly" type="button">Baixar PNG</button>
         </div>
         <div id="chartYearly" class="chart"></div>
       </div>
