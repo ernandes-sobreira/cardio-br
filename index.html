@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel — Doenças Cardíacas (Brasil)</title>
+  <meta name="theme-color" content="#0f172a" />
+
+  <link rel="stylesheet" href="assets/style.css" />
+
+  <!-- Plotly (gráficos) -->
+  <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <!-- PapaParse (CSV) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <script defer src="assets/app.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">❤</div>
+      <div>
+        <div class="title">Painel de Doenças Cardíacas</div>
+        <div class="subtitle">Por ano, mês e município — com comparação</div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <span class="pill" id="pillStatus">Carregando dados…</span>
+      <span class="pill ghost" id="pillFonte">Fonte: seu CSV</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card controls">
+      <h2>Filtros</h2>
+
+      <div class="row">
+        <label class="field">
+          <span>Ano</span>
+          <select id="yearSelect"></select>
+        </label>
+
+        <label class="field">
+          <span>Mês</span>
+          <select id="monthSelect"></select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="field grow">
+          <span>Buscar município</span>
+          <input id="munSearch" type="search" placeholder="Digite para filtrar (ex: Cáceres, Cuiabá…)" autocomplete="off" />
+        </label>
+
+        <div class="hint">
+          <span class="small">Selecione 1+ municípios para comparar</span>
+        </div>
+      </div>
+
+      <div class="munBox">
+        <div class="munHeader">
+          <span class="small muted" id="munCount">0 municípios</span>
+          <div class="munActions">
+            <button class="btn" id="btnSelectTop">Top 5 no ano</button>
+            <button class="btn ghost" id="btnClear">Limpar</button>
+          </div>
+        </div>
+        <div id="munList" class="munList" aria-label="Lista de municípios"></div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpiLabel">Total (filtro atual)</div>
+          <div class="kpiValue" id="kpiTotal">—</div>
+        </div>
+        <div class="kpi">
+          <div class="kpiLabel">Maior município (no filtro)</div>
+          <div class="kpiValue" id="kpiTop">—</div>
+        </div>
+        <div class="kpi">
+          <div class="kpiLabel">Municípios selecionados</div>
+          <div class="kpiValue" id="kpiSel">0</div>
+        </div>
+      </div>
+
+      <div class="footerNote">
+        <div class="small muted" id="rangeInfo">—</div>
+      </div>
+    </section>
+
+    <section class="card charts">
+      <h2>Gráficos</h2>
+
+      <div class="chartWrap">
+        <div class="chartTitle">Evolução mensal (ano selecionado)</div>
+        <div id="chartMonthly" class="chart"></div>
+      </div>
+
+      <div class="chartWrap">
+        <div class="chartTitle">Série histórica anual (comparação)</div>
+        <div id="chartYearly" class="chart"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="small muted">
+      Dica: publique no GitHub Pages (Settings → Pages → Deploy from branch → main / root).
+    </div>
+  </footer>
+</body>
+</html>
