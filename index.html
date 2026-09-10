@@ -7,16 +7,19 @@
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
   <link rel="preconnect" href="https://cdn.plot.ly">
-  <link rel="stylesheet" href="v3/assets/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/style.css">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-part-01.js"></script>
-  <script defer src="v3/assets/data-part-02.js"></script>
-  <script defer src="v3/assets/data-part-03.js"></script>
-  <script defer src="v3/assets/data-part-04.js"></script>
-  <script defer src="v3/assets/data-part-05.js"></script>
-  <script defer src="v3/assets/data-part-06.js"></script>
-  <script defer src="v3/assets/data-loader.js"></script>
-  <script defer src="v3/assets/app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-01.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-02.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-03.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-04.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-05.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-06.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-07.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-gz-part-08.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/data-loader.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/app-core.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/assets/app-modules.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -53,7 +56,7 @@
           <h1 id="pageTitle">Panorama nacional</h1>
         </div>
         <div class="top-actions">
-          <a class="ghost-link" href="v3/data/mortalidade_capitais_2008_2025.csv" download>Baixar CSV</a>
+          <a class="ghost-link" href="#" data-download-health>Baixar CSV</a>
           <a class="primary-link" href="#methods" data-jump="methods">Método</a>
         </div>
       </header>
@@ -193,14 +196,32 @@
             </div>
           </article>
           <div class="download-grid">
-            <a href="v3/data/mortalidade_capitais_2008_2025.csv" download><b>Mortalidade 2008–2025</b><span>CSV · 486 registros</span></a>
-            <a href="v3/data/pm25_piloto_2010_2019.csv" download><b>PM2,5 piloto</b><span>CSV · 12 capitais</span></a>
-            <a href="v3/data/pm25_amazonia_2018_2023.csv" download><b>PM2,5 anual Amazônia</b><span>CSV · 42 capital-anos</span></a>
+            <a href="#" data-download-health><b>Mortalidade 2008–2025</b><span>CSV · 486 registros</span></a>
+            <a href="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/data/pm25_piloto_2010_2019.csv" download><b>PM2,5 piloto</b><span>CSV · 12 capitais</span></a>
+            <a href="https://cdn.jsdelivr.net/gh/ernandes-sobreira/cardio-br@fc2f5fe71dbfff771642c19b35865c212ca49f22/v3/data/pm25_amazonia_2018_2023.csv" download><b>PM2,5 anual Amazônia</b><span>CSV · 42 capital-anos</span></a>
           </div>
           <div class="final-note"><b>Próxima integração planejada:</b> temperatura, extremos de calor, umidade/VPD, precipitação e PM2,5 para todas as capitais, mantendo o mesmo desenho de auditoria e sensibilidade.</div>
         </section>
       </div>
     </main>
   </div>
+
+<script>
+(function(){
+  function csvEscape(v){ if(v===null||v===undefined) return ''; var s=String(v); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+  async function downloadHealth(ev){
+    ev.preventDefault();
+    try{
+      var d=window.CARDIOCLIMA_READY?await window.CARDIOCLIMA_READY:window.CARDIOCLIMA_DATA;
+      var rows=d&&d.health; if(!rows||!rows.length) throw new Error('Base ainda não carregada');
+      var headers=Object.keys(rows[0]);
+      var csv='\ufeff'+headers.map(csvEscape).join(',')+'\n'+rows.map(r=>headers.map(h=>csvEscape(r[h])).join(',')).join('\n');
+      var url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+      var a=document.createElement('a'); a.href=url; a.download='mortalidade_capitais_2008_2025.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }catch(err){ alert('Não foi possível gerar o CSV agora: '+err.message); }
+  }
+  document.addEventListener('click',function(ev){ var a=ev.target.closest('[data-download-health]'); if(a) downloadHealth(ev); });
+})();
+</script>
 </body>
 </html>
