@@ -12,8 +12,9 @@
     const bytes = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
 
-    // Descompressão síncrona: CARDIOCLIMA_DATA existe antes de app-core.js executar.
-    const text = window.pako.ungzip(bytes, {to:'string'});
+    // Tudo síncrono: os dados ficam prontos antes de app-core.js iniciar.
+    const inflated = window.pako.ungzip(bytes);
+    const text = new TextDecoder('utf-8').decode(inflated);
     const P = JSON.parse(text);
     const cls = {'-2':'queda robusta','-1':'sinal de queda','0':'sem tendência robusta','1':'sinal de alta','2':'alta robusta'};
     const analysis = {};
