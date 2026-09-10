@@ -1,6 +1,5 @@
 'use strict';
-const D = window.CARDIOCLIMA_DATA;
-if (!D) throw new Error('Dados CardioClima não carregados.');
+let D;
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
