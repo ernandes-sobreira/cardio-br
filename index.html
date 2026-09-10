@@ -1,137 +1,206 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Painel — Doenças Cardíacas - Mortalidade (Brasil)</title>
-  <meta name="theme-color" content="#0f172a" />
-
-  <link rel="stylesheet" href="assets/style.css" />
-
-  <!-- Plotly (gráficos) -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
+  <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
+  <link rel="preconnect" href="https://cdn.plot.ly">
+  <link rel="stylesheet" href="v3/assets/style.css">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-
-  <!-- PapaParse (CSV) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-  <script defer src="assets/app.js"></script>
+  <script defer src="v3/assets/data-part-01.js"></script>
+  <script defer src="v3/assets/data-part-02.js"></script>
+  <script defer src="v3/assets/data-part-03.js"></script>
+  <script defer src="v3/assets/data-part-04.js"></script>
+  <script defer src="v3/assets/data-part-05.js"></script>
+  <script defer src="v3/assets/data-part-06.js"></script>
+  <script defer src="v3/assets/data-loader.js"></script>
+  <script defer src="v3/assets/app.js"></script>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">❤</div>
-      <div>
-        <div class="title">Painel de Doenças Cardíacas</div>
-        <div class="subtitle">
-          Por ano, mês e município — com comparação
-          <span class="credits">
-            • Elaborado por Ernandes Sobreira; Letícia Zen para análises científicas e políticas públicas. Dados de Mortalidade DATASUS 2025.
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="meta">
-      <span class="pill" id="pillStatus">Carregando dados…</span>
-      <span class="pill ghost" id="pillFonte">Fonte: DATASUS (via CSV)</span>
-    </div>
-  </header>
-
-  <main class="grid">
-    <!-- CONTROLES -->
-    <section class="card controls">
-      <h2>Filtros</h2>
-
-      <div class="row">
-        <label class="field">
-          <span>Ano</span>
-          <select id="yearSelect"></select>
-        </label>
-
-        <label class="field">
-          <span>Mês</span>
-          <select id="monthSelect"></select>
-        </label>
-      </div>
-
-      <div class="row">
-        <label class="field grow">
-          <span>Buscar município</span>
-          <input
-            id="munSearch"
-            type="search"
-            placeholder="Digite para filtrar (ex: Cáceres, Cuiabá…)"
-            autocomplete="off"
-          />
-        </label>
-
-        <div class="hint">
-          <span class="small">Selecione 1+ municípios para comparar</span>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true"><span>CC</span></div>
+        <div>
+          <div class="brand-name">CardioClima <b>BR</b></div>
+          <div class="brand-sub">Saúde × ambiente × tendências</div>
         </div>
       </div>
 
-      <div class="munBox">
-        <div class="munHeader">
-          <span class="small muted" id="munCount">0 municípios</span>
-          <div class="munActions">
-            <button class="btn" id="btnSelectTop" type="button">Top 5 no ano</button>
-            <button class="btn ghost" id="btnClear" type="button">Limpar</button>
+      <nav class="nav" aria-label="Navegação principal">
+        <button class="nav-item active" data-page="overview"><span class="nav-icon">01</span><span><b>Panorama</b><small>o que está acontecendo</small></span></button>
+        <button class="nav-item" data-page="trends"><span class="nav-icon">02</span><span><b>Tendências</b><small>APC, IC95%, FDR, Theil–Sen</small></span></button>
+        <button class="nav-item" data-page="profiles"><span class="nav-icon">03</span><span><b>Perfis</b><small>idade, sexo e regiões</small></span></button>
+        <button class="nav-item" data-page="environment"><span class="nav-icon">04</span><span><b>Ambiente</b><small>PM2,5 e mortalidade</small></span></button>
+        <button class="nav-item" data-page="models"><span class="nav-icon">05</span><span><b>Modelos</b><small>efeitos fixos e sensibilidade</small></span></button>
+        <button class="nav-item" data-page="quality"><span class="nav-icon">06</span><span><b>Qualidade</b><small>cobertura e anomalias</small></span></button>
+        <button class="nav-item" data-page="methods"><span class="nav-icon">07</span><span><b>Método & dados</b><small>fontes, limites e downloads</small></span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <span class="status-dot"></span>
+        <div><b>Base carregada</b><small>27 capitais · 2008–2025</small></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Abrir menu">☰</button>
+        <div class="top-title">
+          <div class="eyebrow">PLATAFORMA CIENTÍFICA INTERATIVA</div>
+          <h1 id="pageTitle">Panorama nacional</h1>
+        </div>
+        <div class="top-actions">
+          <a class="ghost-link" href="v3/data/mortalidade_capitais_2008_2025.csv" download>Baixar CSV</a>
+          <a class="primary-link" href="#methods" data-jump="methods">Método</a>
+        </div>
+      </header>
+
+      <section class="global-filterbar">
+        <label><span>Indicador</span><select id="globalOutcome"></select></label>
+        <label><span>Capital</span><select id="globalCapital"></select></label>
+        <label><span>Região</span><select id="globalRegion"></select></label>
+        <div class="filter-context" id="filterContext">Brasil · Mortalidade geral</div>
+      </section>
+
+      <div class="content">
+        <section class="page active" id="page-overview">
+          <div class="hero-grid">
+            <article class="hero-card hero-dark">
+              <div class="hero-kicker">LEITURA CENTRAL</div>
+              <h2 id="heroHeadline">A série nacional muda de direção depois de 2021.</h2>
+              <p id="heroNarrative">Carregando a leitura estatística…</p>
+              <div class="evidence-strip" id="heroEvidence"></div>
+            </article>
+            <article class="hero-card hero-light">
+              <div class="card-head"><div><span class="section-kicker">SINAL ESTATÍSTICO</span><h3>Quebra de tendência</h3></div><span class="confidence-badge" id="breakBadge">—</span></div>
+              <div class="break-number" id="breakYear">—</div>
+              <p id="breakText">—</p>
+            </article>
           </div>
-        </div>
-        <div id="munList" class="munList" aria-label="Lista de municípios"></div>
+
+          <div class="kpi-grid">
+            <article class="kpi-card"><span>Pico nacional</span><strong id="kpiPeak">—</strong><small id="kpiPeakSub">—</small></article>
+            <article class="kpi-card"><span>Último ano</span><strong id="kpiLatest">—</strong><small id="kpiLatestSub">—</small></article>
+            <article class="kpi-card"><span>Pós-2020</span><strong id="kpiPostSlope">—</strong><small id="kpiPostP">—</small></article>
+            <article class="kpi-card"><span>Tendências robustas</span><strong id="kpiRobust">—</strong><small>controle FDR entre capitais</small></article>
+          </div>
+
+          <div class="dashboard-grid two-thirds">
+            <article class="panel">
+              <div class="panel-head"><div><span class="section-kicker">TRAJETÓRIA</span><h3>Média entre capitais + IC95%</h3></div><div class="panel-note">linha pontilhada = inflexão estimada</div></div>
+              <div class="plot tall" id="overviewTrend"></div>
+            </article>
+            <article class="panel insight-panel">
+              <div class="panel-head"><div><span class="section-kicker">EXPLICAÇÃO</span><h3>O que mudou?</h3></div></div>
+              <div id="insightCards" class="insight-list"></div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid equal">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">2025</span><h3>Ranking das capitais</h3></div></div><div class="plot" id="overviewRanking"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">VULNERABILIDADE ETÁRIA</span><h3>Gradiente de idade</h3></div></div><div class="plot" id="overviewAge"></div></article>
+          </div>
+        </section>
+
+        <section class="page" id="page-trends">
+          <div class="section-intro">
+            <div><span class="section-kicker">TENDÊNCIA ≠ DOIS PONTOS</span><h2>Quanto a taxa muda por ano — e com que confiança?</h2><p>Inclinação linear com erro HAC, APC log-linear, estimador robusto de Theil–Sen e correção FDR de Benjamini–Hochberg para os testes entre capitais.</p></div>
+            <div class="method-chip">n = 18 anos por capital, quando completo</div>
+          </div>
+
+          <div class="dashboard-grid two-thirds">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">CAPITAL SELECIONADA</span><h3 id="capitalTrendTitle">—</h3></div><span id="capitalTrendBadge" class="trend-badge">—</span></div><div class="plot tall" id="capitalTrendPlot"></div></article>
+            <article class="panel metric-stack" id="capitalTrendMetrics"></article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head"><div><span class="section-kicker">27 CAPITAIS</span><h3>Inclinação anual e IC95%</h3></div><div class="panel-note">ordenado pela inclinação</div></div>
+            <div class="plot xl" id="slopeForest"></div>
+          </article>
+
+          <article class="panel table-panel">
+            <div class="panel-head"><div><span class="section-kicker">AUDITORIA ESTATÍSTICA</span><h3>Tabela de tendências</h3></div><input id="trendSearch" class="search" type="search" placeholder="Buscar capital…"></div>
+            <div class="table-wrap"><table><thead><tr><th>Capital</th><th>APC %/ano</th><th>Inclinação</th><th>IC95%</th><th>p (HAC)</th><th>q (FDR)</th><th>Theil–Sen</th><th>Classificação</th></tr></thead><tbody id="trendTableBody"></tbody></table></div>
+          </article>
+        </section>
+
+        <section class="page" id="page-profiles">
+          <div class="section-intro"><div><span class="section-kicker">QUEM CONCENTRA AS MAIORES TAXAS?</span><h2>Perfis demográficos e regionais</h2><p>Os painéis abaixo tratam sexo, idade e região como dimensões descritivas da mortalidade hospitalar. Raça/cor fica separada pela maior incompletude em alguns grupos.</p></div></div>
+          <div class="dashboard-grid equal">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">IDADE</span><h3>Curvas etárias: 2008 × 2020 × 2025</h3></div></div><div class="plot tall" id="ageProfile"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">SEXO</span><h3>Masculino × feminino</h3></div></div><div class="plot tall" id="sexTrend"></div></article>
+          </div>
+          <article class="panel"><div class="panel-head"><div><span class="section-kicker">REGIÕES</span><h3>Trajetórias regionais</h3></div><div class="panel-note">média simples das capitais da região</div></div><div class="plot tall" id="regionTrend"></div></article>
+          <article class="panel"><div class="panel-head"><div><span class="section-kicker">RAÇA/COR</span><h3>Cobertura antes da interpretação</h3></div></div><div class="race-warning" id="raceWarning"></div><div class="plot" id="raceCoverage"></div></article>
+        </section>
+
+        <section class="page" id="page-environment">
+          <div class="section-intro"><div><span class="section-kicker">MÓDULO AMBIENTAL — COBERTURA PARCIAL</span><h2>PM2,5: associação ecológica e painel longitudinal</h2><p>Duas camadas analíticas são mantidas separadas: um piloto decenal com 12 capitais e um painel anual de 7 capitais amazônicas. Isso evita misturar desenhos de estudo diferentes.</p></div><div class="method-chip amber">não causal</div></div>
+
+          <div class="env-controls">
+            <label><span>Exposição</span><select id="envExposure"></select></label>
+            <label><span>Desfecho</span><select id="envOutcome"></select></label>
+          </div>
+
+          <div class="dashboard-grid two-thirds">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">12 CAPITAIS · 2010–2019</span><h3 id="envScatterTitle">PM2,5 × mortalidade</h3></div><span class="confidence-badge" id="envSig">—</span></div><div class="plot tall" id="envScatter"></div></article>
+            <article class="panel metric-stack" id="envMetrics"></article>
+          </div>
+
+          <div class="dashboard-grid equal">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">ROBUSTEZ</span><h3>Leave-one-capital-out</h3></div><div class="panel-note">correlação ao retirar cada capital</div></div><div class="plot" id="envLoo"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">7 CAPITAIS · 2018–2023</span><h3>Efeito fixo dentro da capital</h3></div></div><div class="plot" id="envFixedEffects"></div></article>
+          </div>
+
+          <article class="panel caveat-panel"><div class="caveat-icon">!</div><div><h3>Como ler o módulo ambiental</h3><p id="envCaveat">—</p></div></article>
+        </section>
+
+        <section class="page" id="page-models">
+          <div class="section-intro"><div><span class="section-kicker">MODELOS PARA EXPLICAR A CURVA</span><h2>Segmentação temporal e sensibilidade</h2><p>O modelo segmentado usa efeitos fixos de capital e erros-padrão agrupados por capital. O objetivo é distinguir tendência antes de 2020, mudança de nível em 2020 e inclinação depois de 2020.</p></div></div>
+          <article class="panel"><div class="panel-head"><div><span class="section-kicker">MODELO SEGMENTADO</span><h3>Inclinação pré e pós-2020</h3></div></div><div class="plot xl" id="segmentedForest"></div></article>
+          <div class="dashboard-grid equal">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">PICO / INFLEXÃO</span><h3>Modelos comparados</h3></div></div><div id="modelNarrative" class="model-narrative"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">SENSIBILIDADE</span><h3>PM2,5 e 80+ anos</h3></div></div><div id="sensitivityNarrative" class="model-narrative"></div></article>
+          </div>
+        </section>
+
+        <section class="page" id="page-quality">
+          <div class="section-intro"><div><span class="section-kicker">NÃO ESCONDER PROBLEMAS DO DADO</span><h2>Cobertura, anomalias e limites</h2><p>Uma plataforma científica confiável mostra onde os dados são fortes e onde exigem auditoria antes da interpretação.</p></div></div>
+          <div class="dashboard-grid equal">
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">COMPLETUDE</span><h3>Cobertura por indicador</h3></div></div><div class="plot tall" id="coveragePlot"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">SINAL DE ALERTA</span><h3>Macapá 2023</h3></div></div><div class="quality-callout"><strong>12,54 → 1,34</strong><span>queda de 11,2 pontos percentuais entre 2022 e 2023</span><p>É uma ruptura muito maior que a variabilidade histórica da própria capital. Deve ser auditada em origem antes de sustentar qualquer conclusão sobre a Região Norte no pós-2022.</p></div></article>
+          </div>
+          <article class="panel table-panel"><div class="panel-head"><div><span class="section-kicker">DETECÇÃO ROBUSTA</span><h3>Maiores mudanças ano a ano</h3></div><div class="panel-note">modified z-score / variação absoluta</div></div><div class="table-wrap"><table><thead><tr><th>Capital</th><th>Período</th><th>Antes</th><th>Depois</th><th>Δ p.p.</th><th>z modificado</th></tr></thead><tbody id="anomalyBody"></tbody></table></div></article>
+        </section>
+
+        <section class="page" id="page-methods">
+          <div class="section-intro"><div><span class="section-kicker">TRANSPARÊNCIA REPRODUTÍVEL</span><h2>Método, fontes e interpretação</h2><p>Os resultados devem ser lidos como análise ecológica de mortalidade hospitalar cardiovascular, e não como risco populacional de morte nem como efeito causal individual.</p></div></div>
+          <div class="method-grid">
+            <article class="method-card"><span>01</span><h3>Desfecho</h3><p>Taxa de mortalidade hospitalar por doenças do aparelho circulatório (CID-10, Capítulo IX), por local de residência.</p></article>
+            <article class="method-card"><span>02</span><h3>Tendência</h3><p>OLS com erro HAC(1), APC log-linear e Theil–Sen. p-valores entre capitais são ajustados por Benjamini–Hochberg (FDR).</p></article>
+            <article class="method-card"><span>03</span><h3>Segmentação</h3><p>Efeitos fixos de capital + termo temporal + nível em 2020 + mudança de inclinação pós-2020; SE agrupado por capital.</p></article>
+            <article class="method-card"><span>04</span><h3>Ambiente</h3><p>Piloto PM2,5 com correlação Pearson/Spearman, regressão robusta HC1 e leave-one-out; painel anual com efeitos fixos de capital e ano.</p></article>
+          </div>
+          <article class="panel source-panel">
+            <div class="panel-head"><div><span class="section-kicker">FONTES</span><h3>De onde vêm os dados</h3></div></div>
+            <div class="source-list">
+              <div><b>Saúde</b><span>Ministério da Saúde — SIH/SUS · doenças do aparelho circulatório.</span></div>
+              <div><b>PM2,5 piloto</b><a href="https://doi.org/10.1590/0102-311XEN131422" target="_blank" rel="noreferrer">Artigo / conjunto utilizado no piloto 2010–2019</a></div>
+              <div><b>PM2,5 anual</b><a href="https://doi.org/10.1016/j.tox.2026.154401" target="_blank" rel="noreferrer">Artigo / conjunto anual amazônico 2018–2023</a></div>
+            </div>
+          </article>
+          <div class="download-grid">
+            <a href="v3/data/mortalidade_capitais_2008_2025.csv" download><b>Mortalidade 2008–2025</b><span>CSV · 486 registros</span></a>
+            <a href="v3/data/pm25_piloto_2010_2019.csv" download><b>PM2,5 piloto</b><span>CSV · 12 capitais</span></a>
+            <a href="v3/data/pm25_amazonia_2018_2023.csv" download><b>PM2,5 anual Amazônia</b><span>CSV · 42 capital-anos</span></a>
+          </div>
+          <div class="final-note"><b>Próxima integração planejada:</b> temperatura, extremos de calor, umidade/VPD, precipitação e PM2,5 para todas as capitais, mantendo o mesmo desenho de auditoria e sensibilidade.</div>
+        </section>
       </div>
-
-      <div class="kpis">
-        <div class="kpi">
-          <div class="kpiLabel">Total (filtro atual)</div>
-          <div class="kpiValue" id="kpiTotal">—</div>
-        </div>
-        <div class="kpi">
-          <div class="kpiLabel">Maior município (no filtro)</div>
-          <div class="kpiValue" id="kpiTop">—</div>
-        </div>
-        <div class="kpi">
-          <div class="kpiLabel">Municípios selecionados</div>
-          <div class="kpiValue" id="kpiSel">0</div>
-        </div>
-      </div>
-
-      <div class="row" style="padding-bottom:12px">
-        <button class="btn accent" id="btnDownloadData" type="button">Baixar dados (CSV)</button>
-      </div>
-
-      <div class="footerNote">
-        <div class="small muted" id="rangeInfo">—</div>
-      </div>
-    </section>
-
-    <!-- GRÁFICOS -->
-    <section class="card charts">
-      <h2>Gráficos</h2>
-
-      <div class="chartWrap">
-        <div class="chartHead">
-          <div class="chartTitle" id="titleMonthly">—</div>
-          <button class="btn smallbtn" id="btnDlMonthly" type="button">Baixar PNG</button>
-        </div>
-        <div id="chartMonthly" class="chart"></div>
-      </div>
-
-      <div class="chartWrap">
-        <div class="chartHead">
-          <div class="chartTitle" id="titleYearly">—</div>
-          <button class="btn smallbtn" id="btnDlYearly" type="button">Baixar PNG</button>
-        </div>
-        <div id="chartYearly" class="chart"></div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <div class="small muted">
-      © Painel local (GitHub Pages) — uso educacional, científico e apoio a políticas públicas.
-    </div>
-  </footer>
+    </main>
+  </div>
 </body>
 </html>
