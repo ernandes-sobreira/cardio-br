@@ -20,3 +20,12 @@ button,select,input,a{font:inherit} a{color:inherit}.app-shell{min-height:100vh}
 @media(max-width:1180px){.hero-grid,.dashboard-grid.two-thirds,.dashboard-grid.equal{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}.method-grid{grid-template-columns:repeat(2,1fr)}.download-grid{grid-template-columns:1fr}.plot.xl{height:520px}}
 @media(max-width:820px){:root{--sidebar:264px}.sidebar{transform:translateX(-105%);transition:.22s ease}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.mobile-menu{display:block}.topbar{height:72px;padding:0 16px}.top-title .eyebrow{display:none}.top-title h1{font-size:18px}.top-actions .ghost-link{display:none}.global-filterbar{top:72px;padding:10px 14px;overflow-x:auto;align-items:end}.global-filterbar select{min-width:145px}.filter-context{display:none}.content{padding:18px 14px 40px}.hero-grid{grid-template-columns:1fr}.hero-card{padding:22px;min-height:auto}.hero-dark h2{font-size:28px}.break-number{font-size:58px;margin-top:24px}.kpi-grid{grid-template-columns:1fr 1fr}.section-intro{flex-direction:column}.section-intro h2{font-size:24px}.method-grid{grid-template-columns:1fr}.env-controls{overflow-x:auto}.plot{height:320px}.plot.tall{height:360px}.plot.xl{height:500px}.source-list>div{grid-template-columns:1fr;gap:4px}.top-actions{display:none}}
 @media(max-width:500px){.kpi-grid{grid-template-columns:1fr}.hero-dark h2{font-size:25px}.global-filterbar label:nth-child(3){display:none}.panel{padding:15px}.section-intro h2{font-size:22px}.plot.xl{height:460px}}
+
+.env-controls{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr)) auto;gap:12px;align-items:end;margin:0 0 8px}
+.env-run{border:0;border-radius:12px;background:var(--navy);color:#fff;padding:11px 18px;font-weight:900;letter-spacing:.035em;min-height:42px;box-shadow:0 8px 20px rgba(7,17,31,.13)}
+.env-run:hover{transform:translateY(-1px)}
+.env-run:active{transform:translateY(0)}
+.env-run-status{grid-column:1/-1;font-size:12px;color:var(--muted);padding:2px 1px 8px}
+#envPanelSummary{margin-top:16px}
+@media(max-width:1100px){.env-controls{grid-template-columns:1fr 1fr}.env-run{width:100%}}
+@media(max-width:640px){.env-controls{grid-template-columns:1fr}.env-controls select{width:100%;min-width:0}.env-run-status{grid-column:auto}}
