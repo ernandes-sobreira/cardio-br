@@ -30,7 +30,7 @@ function renderProfiles(){
   const regTr=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'].map(reg=>{const vals=years.map(year=>{const rr=D.mortality.filter(r=>r['Região']===reg&&r.Ano===year&&r[state.outcome]!=null);return rr.length?rr.reduce((s,r)=>s+r[state.outcome],0)/rr.length:null;});return {x:years,y:vals,mode:'lines',name:reg,line:{width:2.5,color:regionColors[reg]}};});
   plot('regionTrend',regTr,{yaxis:{title:'Taxa hospitalar (%)',gridcolor:'#edf2f6'},xaxis:{dtick:2,gridcolor:'#f1f4f7'}});
   const race=D.missingness.filter(d=>d.group==='Raça/cor').sort((a,b)=>a.coverage_pct-b.coverage_pct);
-  $('#raceWarning').innerHTML=`A completude varia fortemente: <b>${race[0].label}</b> tem apenas ${f(race[0].coverage_pct,1)}% de cobertura, enquanto <b>${race.at(-1].label}</b> chega a ${f(race.at(-1).coverage_pct,1)}%. Comparações de raça/cor devem ser secundárias e acompanhadas da cobertura.`;
+  $('#raceWarning').innerHTML=`A completude varia fortemente: <b>${race[0].label}</b> tem apenas ${f(race[0].coverage_pct,1)}% de cobertura, enquanto <b>${race.at(-1).label}</b> chega a ${f(race.at(-1).coverage_pct,1)}%. Comparações de raça/cor devem ser secundárias e acompanhadas da cobertura.`;
   plot('raceCoverage',[{x:race.map(d=>d.coverage_pct),y:race.map(d=>d.label),type:'bar',orientation:'h',marker:{color:race.map(d=>d.coverage_pct<70?colors.amber:colors.teal)},text:race.map(d=>`${f(d.coverage_pct,1)}%`),textposition:'outside'}],{margin:{l:100,r:45,t:10,b:40},xaxis:{range:[0,105],title:'Cobertura (%)',gridcolor:'#edf2f6'},showlegend:false});
 }
 
@@ -95,4 +95,24 @@ function init(){
   updateContext(); renderOverview(); renderTrends(); renderProfiles(); renderEnvironment(); renderModels(); renderQuality();
   window.addEventListener('resize',()=>{window.Plotly&&$$('.page.active .js-plotly-plot').forEach(el=>Plotly.Plots.resize(el));});
 }
-window.addEventListener('DOMContentLoaded',init);
+async function boot(){
+  try {
+    D = window.CARDIOCLIMA_READY ? await window.CARDIOCLIMA_READY : window.CARDIOCLIMA_DATA;
+    if (!D) throw new Error('Dados CardioClima não carregados.');
+    init();
+  } catch (err) {
+    console.error('CardioClima boot:', err);
+    const showError = () => {
+      if (document.querySelector('[data-cardio-boot-error]')) return;
+      const box = document.createElement('div');
+      box.setAttribute('data-cardio-boot-error','');
+      box.style.cssText = 'position:relative;z-index:99999;padding:14px 18px;background:#991b1b;color:#fff;font:600 14px system-ui';
+      box.textContent = 'Falha ao iniciar o CardioClima: ' + err.message;
+      document.body.prepend(box);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showError, {once:true});
+    else showError();
+  }
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+else boot();
