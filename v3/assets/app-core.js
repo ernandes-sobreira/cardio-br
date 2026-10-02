@@ -10,7 +10,7 @@ const colors = {navy:'#0b1725',teal:'#0b8f8a',teal2:'#26b8b0',violet:'#6d5dfc',a
 const regionColors = {'Norte':'#0b8f8a','Nordeste':'#e69500','Centro-Oeste':'#6d5dfc','Sudeste':'#d8495a','Sul':'#2d7bb6'};
 const pageTitles = {overview:'Panorama nacional',trends:'Tendências e evidência',profiles:'Perfis demográficos',environment:'Ambiente e PM2,5',models:'Modelos e sensibilidade',quality:'Qualidade dos dados',methods:'Método e dados'};
 
-const state = { page:'overview', outcome:'Taxa mortalidade geral', capital:'ALL', region:'ALL', envExposure:'PM2,5 P99 (µg/m³)', envOutcome:'70–79 média' };
+const state = { page:'overview', outcome:'Taxa mortalidade geral', capital:'ALL', region:'ALL', envExposure:'PM2,5 P99 (µg/m³)', envOutcome:'70–79 média', envPanelOutcome:'80+' };
 
 function f(v,d=2){ return v==null || Number.isNaN(+v) ? '—' : new Intl.NumberFormat('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(+v); }
 function fp(v){ if(v==null || Number.isNaN(+v)) return '—'; if(+v < .001) return '< 0,001'; return new Intl.NumberFormat('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}).format(+v); }
