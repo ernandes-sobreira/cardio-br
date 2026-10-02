@@ -146,6 +146,10 @@ def model_fe(df, xcol, exclude=False):
     if exclude:
         d=d[~d["Ano"].isin([2020,2021])]
     d=d.dropna(subset=["y",xcol,"Capital","Ano"]).copy()
+    d["Ano"] = pd.to_numeric(d["Ano"], errors="raise").astype(int)
+    d["Capital"] = d["Capital"].astype(str)
+    d["y"] = pd.to_numeric(d["y"], errors="raise").astype(float)
+    d[xcol] = pd.to_numeric(d[xcol], errors="raise").astype(float)
     if len(d) < 60 or d["Capital"].nunique() < 10:
         return None
     try:
@@ -173,6 +177,10 @@ def model_diff(df, xcol):
     d["dy"]=d.groupby("Capital")["y"].diff()
     d["dx"]=d.groupby("Capital")[xcol].diff()
     d=d.dropna(subset=["dy","dx","Capital","Ano"]).copy()
+    d["Ano"] = pd.to_numeric(d["Ano"], errors="raise").astype(int)
+    d["Capital"] = d["Capital"].astype(str)
+    d["dy"] = pd.to_numeric(d["dy"], errors="raise").astype(float)
+    d["dx"] = pd.to_numeric(d["dx"], errors="raise").astype(float)
     if len(d) < 50 or d["Capital"].nunique() < 10:
         return None
     try:
