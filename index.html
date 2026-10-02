@@ -6,19 +6,20 @@
   <meta name="theme-color" content="#07111f">
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
-  <link rel="stylesheet" href="v3/assets/style.css?v=10">
+  <link rel="stylesheet" href="v3/assets/style.css?v=11">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-gz-part-01.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-02.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-03.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-04.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-05.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-06.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-07.js?v=10"></script>
-  <script defer src="v3/assets/data-gz-part-08.js?v=10"></script>
-  <script defer src="v3/assets/data-loader.js?v=10"></script>
-  <script defer src="v3/assets/app-core.js?v=10"></script>
-  <script defer src="v3/assets/app-modules.js?v=10"></script>
+  <script defer src="v3/assets/data-gz-part-01.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-02.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-03.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-04.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-05.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-06.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-07.js?v=11"></script>
+  <script defer src="v3/assets/data-gz-part-08.js?v=11"></script>
+  <script defer src="v3/assets/data-loader.js?v=11"></script>
+  <script defer src="v3/assets/pm25-capitais-data.js?v=11"></script>
+  <script defer src="v3/assets/app-core.js?v=11"></script>
+  <script defer src="v3/assets/app-modules.js?v=11"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -140,28 +141,27 @@
         </section>
 
         <section class="page" id="page-environment">
-          <div class="section-intro"><div><span class="section-kicker">MÓDULO AMBIENTAL — COBERTURA PARCIAL</span><h2>PM2,5: associação ecológica e painel longitudinal</h2><p>Duas camadas analíticas são mantidas separadas: um piloto decenal com 12 capitais e um painel anual de 7 capitais amazônicas. Isso evita misturar desenhos de estudo diferentes.</p></div><div class="method-chip amber">não causal</div></div>
+          <div class="section-intro"><div><span class="section-kicker">MÓDULO AMBIENTAL — COBERTURA NACIONAL</span><h2>PM2,5 × saúde nas 27 capitais brasileiras</h2><p>Base diária CAMS/EAC4 para todas as capitais, agregada de 2008 a 2024. Selecione a métrica de exposição e qualquer grupo de saúde disponível para recalcular a análise.</p></div><div class="method-chip amber">ecológico · não causal</div></div>
 
           <div class="env-controls">
-            <label><span>Exposição · piloto 12 capitais</span><select id="envExposure"></select></label>
-            <label><span>Grupo · piloto 12 capitais</span><select id="envOutcome"></select></label>
-            <label><span>Grupo · painel anual 7 capitais</span><select id="envPanelOutcome"></select></label>
+            <label><span>Exposição PM2,5</span><select id="envExposure"></select></label>
+            <label><span>Grupo / indicador de saúde</span><select id="envOutcome"></select></label>
             <button type="button" class="env-run" id="envRun">CALCULAR ANÁLISE</button>
-            <div class="env-run-status" id="envRunStatus">Escolha as opções e clique em calcular.</div>
+            <div class="env-run-status" id="envRunStatus">27 capitais · 2008–2024 · escolha as opções e clique em calcular.</div>
           </div>
 
           <div class="dashboard-grid two-thirds">
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">12 CAPITAIS · 2010–2019</span><h3 id="envScatterTitle">PM2,5 × mortalidade</h3></div><span class="confidence-badge" id="envSig">—</span></div><div class="plot tall" id="envScatter"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">27 CAPITAIS · 2008–2024</span><h3 id="envScatterTitle">PM2,5 × saúde</h3></div><span class="confidence-badge" id="envSig">—</span></div><div class="plot tall" id="envScatter"></div></article>
             <article class="panel metric-stack" id="envMetrics"></article>
           </div>
 
           <div class="dashboard-grid equal">
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">ROBUSTEZ</span><h3>Leave-one-capital-out</h3></div><div class="panel-note">correlação ao retirar cada capital</div></div><div class="plot" id="envLoo"></div></article>
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">7 CAPITAIS · 2018–2023</span><h3 id="envPanelTitle">Efeito fixo dentro da capital</h3></div></div><div class="plot" id="envFixedEffects"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">TRAJETÓRIA AMBIENTAL</span><h3>PM2,5 por região</h3></div><div class="panel-note">média das capitais de cada região</div></div><div class="plot" id="envRegionTrend"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">27 CAPITAIS · 2024</span><h3 id="envRankingTitle">Ranking da exposição</h3></div></div><div class="plot" id="envCapitalRanking"></div></article>
           </div>
 
           <article class="panel" id="envPanelSummary">
-            <div class="panel-head"><div><span class="section-kicker">RESULTADO DO GRUPO SELECIONADO</span><h3 id="envPanelSummaryTitle">Painel anual</h3></div><span class="confidence-badge" id="envPanelSig">—</span></div>
+            <div class="panel-head"><div><span class="section-kicker">MODELO LONGITUDINAL</span><h3 id="envPanelSummaryTitle">Efeitos fixos de capital e ano</h3></div><span class="confidence-badge" id="envPanelSig">—</span></div>
             <div class="model-narrative" id="envPanelSummaryBody"></div>
           </article>
 
@@ -207,14 +207,14 @@
             <div class="panel-head"><div><span class="section-kicker">FONTES</span><h3>De onde vêm os dados</h3></div></div>
             <div class="source-list">
               <div><b>Saúde</b><span>Dados do Ministério da Saúde, por meio do Sistema de Informações Hospitalares do SUS (SIH/SUS), referentes às doenças do aparelho circulatório (CID-10, Capítulo IX).</span></div>
-              <div><b>PM2,5 piloto</b><a href="https://doi.org/10.1590/0102-311XEN131422" target="_blank" rel="noreferrer">Artigo / conjunto utilizado no piloto 2010–2019</a></div>
-              <div><b>PM2,5 anual</b><a href="https://doi.org/10.1016/j.tox.2026.154401" target="_blank" rel="noreferrer">Artigo / conjunto anual amazônico 2018–2023</a></div>
+              <div><b>PM2,5 nacional</b><a href="https://doi.org/10.5281/zenodo.16374139" target="_blank" rel="noreferrer">CAMS/EAC4 · Fundação Oswaldo Cruz · municípios brasileiros · 2003–2024</a></div>
+              <div><b>Recorte utilizado</b><span>27 capitais brasileiras · 2008–2024 · 167.670 registros diários e 459 capital-anos.</span></div>
             </div>
           </article>
           <div class="download-grid">
             <a href="#" data-download-health><b>Mortalidade 2008–2025</b><span>CSV · 486 registros</span></a>
-            <a href="v3/data/pm25_piloto_2010_2019.csv" download><b>PM2,5 piloto</b><span>CSV · 12 capitais</span></a>
-            <a href="v3/data/pm25_amazonia_2018_2023.csv" download><b>PM2,5 anual Amazônia</b><span>CSV · 42 capital-anos</span></a>
+            <a href="v3/data/pm25_capitais_anual_2008_2024.csv" download><b>PM2,5 anual — 27 capitais</b><span>CSV · 459 capital-anos</span></a>
+            <a href="v3/data/pm25_capitais_diario_2008_2024.csv" download><b>PM2,5 diário — 27 capitais</b><span>CSV · 167.670 registros</span></a>
           </div>
           <div class="final-note"><b>Próxima integração planejada:</b> temperatura, extremos de calor, umidade/VPD, precipitação e PM2,5 para todas as capitais, mantendo o mesmo desenho de auditoria e sensibilidade.</div>
         </section>
