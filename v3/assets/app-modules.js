@@ -36,27 +36,96 @@ function renderProfiles(){
 
 const envExposureLabels={'PM2,5 média (µg/m³)':'PM2,5 média','PM2,5 média seca (µg/m³)':'PM2,5 média — estação seca','PM2,5 P99 (µg/m³)':'PM2,5 P99','Dias PM2,5 >15 (%)':'Dias > 15 µg/m³'};
 const envOutcomeLabels={'Mortalidade geral média 2010–2019':'Mortalidade geral','60–69 média':'60–69 anos','70–79 média':'70–79 anos','80+ média':'80+ anos'};
+const envPanelOutcomeLabels={'Mortalidade geral':'Mortalidade geral','Masculino':'Masculino','Feminino':'Feminino','60–69':'60–69 anos','70–79':'70–79 anos','80+':'80+ anos'};
+
 function setupEnvControls(){
-  $('#envExposure').innerHTML=Object.entries(envExposureLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join(''); $('#envExposure').value=state.envExposure;
-  $('#envOutcome').innerHTML=Object.entries(envOutcomeLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join(''); $('#envOutcome').value=state.envOutcome;
-  $('#envExposure').addEventListener('change',e=>{state.envExposure=e.target.value;renderEnvironment();}); $('#envOutcome').addEventListener('change',e=>{state.envOutcome=e.target.value;renderEnvironment();});
+  const ex=$('#envExposure'), oy=$('#envOutcome'), py=$('#envPanelOutcome'), run=$('#envRun');
+  ex.innerHTML=Object.entries(envExposureLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  oy.innerHTML=Object.entries(envOutcomeLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  py.innerHTML=Object.entries(envPanelOutcomeLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+  ex.value=state.envExposure; oy.value=state.envOutcome; py.value=state.envPanelOutcome;
+
+  run.addEventListener('click',()=>{
+    state.envExposure=ex.value;
+    state.envOutcome=oy.value;
+    state.envPanelOutcome=py.value;
+    renderEnvironment();
+    const status=$('#envRunStatus');
+    status.innerHTML=`Análise calculada: <b>${envExposureLabels[state.envExposure]}</b> × <b>${envOutcomeLabels[state.envOutcome]}</b>; painel anual destacado para <b>${envPanelOutcomeLabels[state.envPanelOutcome]}</b>.`;
+  });
 }
+
 function renderEnvironment(){
-  const xk=state.envExposure, yk=state.envOutcome, rows=D.pm25_pilot.filter(r=>r[xk]!=null&&r[yk]!=null); const x=rows.map(r=>r[xk]),y=rows.map(r=>r[yk]); const fit=linearFit(x,y), st=D.pm25_pilot_stats[xk][yk];
+  const xk=state.envExposure, yk=state.envOutcome;
+  const rows=D.pm25_pilot.filter(r=>r[xk]!=null&&r[yk]!=null);
+  const st=D.pm25_pilot_stats?.[xk]?.[yk];
+  if(!rows.length||!st){
+    $('#envMetrics').innerHTML='<div class="metric-block">Não há dados suficientes para esta combinação.</div>';
+    return;
+  }
+
+  const x=rows.map(r=>r[xk]), y=rows.map(r=>r[yk]), fit=linearFit(x,y);
   const xs=[Math.min(...x),Math.max(...x)], ys=xs.map(v=>fit.intercept+fit.slope*v);
-  const groups=[...new Set(rows.map(r=>r['Região']))]; const tr=groups.map(g=>{const rr=rows.filter(r=>r['Região']===g);return {x:rr.map(r=>r[xk]),y:rr.map(r=>r[yk]),text:rr.map(r=>r.Capital),mode:'markers+text',textposition:'top center',name:g,marker:{size:11,color:regionColors[g]||colors.teal,line:{color:'#fff',width:1.5}},hovertemplate:'<b>%{text}</b><br>x %{x:.2f}<br>y %{y:.2f}%<extra></extra>'};}); tr.push({x:xs,y:ys,mode:'lines',name:'OLS',line:{color:colors.navy,width:2,dash:'dash'},hoverinfo:'skip'});
-  $('#envScatterTitle').textContent=`${envExposureLabels[xk]} × ${envOutcomeLabels[yk]}`; const sig=$('#envSig'); sig.textContent=st.p_pearson<.05?'associação detectável':'evidência fraca'; sig.style.background=st.p_pearson<.05?'#e8f8f1':'#f2f5f8'; sig.style.color=st.p_pearson<.05?'#176c49':'#647486';
+  const groups=[...new Set(rows.map(r=>r['Região']))];
+  const tr=groups.map(g=>{
+    const rr=rows.filter(r=>r['Região']===g);
+    return {x:rr.map(r=>r[xk]),y:rr.map(r=>r[yk]),text:rr.map(r=>r.Capital),mode:'markers+text',textposition:'top center',name:g,marker:{size:11,color:regionColors[g]||colors.teal,line:{color:'#fff',width:1.5}},hovertemplate:'<b>%{text}</b><br>x %{x:.2f}<br>y %{y:.2f}%<extra></extra>'};
+  });
+  tr.push({x:xs,y:ys,mode:'lines',name:'OLS',line:{color:colors.navy,width:2,dash:'dash'},hoverinfo:'skip'});
+
+  $('#envScatterTitle').textContent=`${envExposureLabels[xk]} × ${envOutcomeLabels[yk]}`;
+  const sig=$('#envSig');
+  sig.textContent=st.p_pearson<.05?'associação detectável':'evidência fraca';
+  sig.style.background=st.p_pearson<.05?'#e8f8f1':'#f2f5f8';
+  sig.style.color=st.p_pearson<.05?'#176c49':'#647486';
+
   plot('envScatter',tr,{xaxis:{title:envExposureLabels[xk],gridcolor:'#edf2f6'},yaxis:{title:'Taxa hospitalar média (%)',gridcolor:'#edf2f6'},legend:{orientation:'h',y:-.23}});
   $('#envMetrics').innerHTML=`
     <div class="metric-block emphasis"><span>Pearson</span><strong>r = ${f(st.r,3)}</strong><small>p ${fp(st.p_pearson)} · R² ${f(st.r2,3)}</small></div>
-    <div class="metric-block"><span>Spearman</span><strong>ρ = ${f(st.rho,3)}</strong><small>p ${fp(st.p_spearman)} · robusto à forma linear</small></div>
+    <div class="metric-block"><span>Spearman</span><strong>ρ = ${f(st.rho,3)}</strong><small>p ${fp(st.p_spearman)} · associação monotônica</small></div>
     <div class="metric-block"><span>Regressão HC1</span><strong>${pp(st.slope*10,2)}</strong><small>por +10 unidades da exposição; IC95% ${f(st.ci_low*10,2)} a ${f(st.ci_high*10,2)}</small></div>
     <div class="metric-block"><span>Leave-one-out</span><strong>r ${f(st.loo_r_min,2)} → ${f(st.loo_r_max,2)}</strong><small>maior p ao retirar uma capital: ${fp(st.loo_p_max)}</small></div>`;
-  const loo=rows.map((r0,i)=>{const rr=rows.filter((_,j)=>j!==i);return {cap:r0.Capital,r:pearson(rr.map(r=>r[xk]),rr.map(r=>r[yk]))};}).sort((a,b)=>a.r-b.r);
+
+  const loo=rows.map((r0,i)=>{
+    const rr=rows.filter((_,j)=>j!==i);
+    return {cap:r0.Capital,r:pearson(rr.map(r=>r[xk]),rr.map(r=>r[yk]))};
+  }).sort((a,b)=>a.r-b.r);
   plot('envLoo',[{x:loo.map(d=>d.r),y:loo.map(d=>d.cap),mode:'markers',marker:{size:9,color:loo.map(d=>d.r>=0?colors.teal:colors.red)},type:'scatter'}],{margin:{l:95,r:25,t:10,b:40},xaxis:{title:'r após excluir a capital',zeroline:true,zerolinecolor:'#607386',gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'}});
-  const outs=['Mortalidade geral','Masculino','Feminino','60–69','70–79','80+']; const vals=outs.map(o=>D.pm25_panel_stats[o].full);
-  plot('envFixedEffects',[{x:vals.map(v=>v.coef*10),y:outs,mode:'markers',marker:{size:9,color:vals.map(v=>v.p<.05?colors.red:colors.violet)},error_x:{type:'data',symmetric:false,array:vals.map(v=>(v.ci_high-v.coef)*10),arrayminus:vals.map(v=>(v.coef-v.ci_low)*10),color:'#8798a9'},customdata:vals.map(v=>[v.p,v.r2]),hovertemplate:'<b>%{y}</b><br>%{x:.2f} p.p. por +10 µg/m³<br>p %{customdata[0]:.4f}<br>R² modelo %{customdata[1]:.2f}<extra></extra>'}],{margin:{l:105,r:25,t:10,b:42},xaxis:{title:'Coeficiente por +10 µg/m³',zeroline:true,zerolinecolor:'#33485d',gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'}});
-  $('#envCaveat').textContent=`No piloto de 12 capitais, a associação é entre médias de exposição e médias de mortalidade de 2010–2019; portanto, diferenças estruturais entre cidades podem confundir o resultado. O painel de 7 capitais controla características fixas da capital e do ano, mas ainda tem apenas 42 observações e 7 cidades. Por isso, efeito, IC95%, estabilidade leave-one-out e análise de primeira diferença são mostrados juntos.`;
+
+  const outs=['Mortalidade geral','Masculino','Feminino','60–69','70–79','80+'];
+  const vals=outs.map(o=>D.pm25_panel_stats[o].full);
+  const selected=state.envPanelOutcome;
+  plot('envFixedEffects',[{
+    x:vals.map(v=>v.coef*10),y:outs,mode:'markers',
+    marker:{
+      size:outs.map(o=>o===selected?15:9),
+      color:outs.map((o,i)=>o===selected?colors.navy:(vals[i].p<.05?colors.red:colors.violet)),
+      line:{color:'#fff',width:1.5}
+    },
+    error_x:{type:'data',symmetric:false,array:vals.map(v=>(v.ci_high-v.coef)*10),arrayminus:vals.map(v=>(v.coef-v.ci_low)*10),color:'#8798a9'},
+    customdata:vals.map(v=>[v.p,v.r2]),
+    hovertemplate:'<b>%{y}</b><br>%{x:.2f} p.p. por +10 µg/m³<br>p %{customdata[0]:.4f}<br>R² modelo %{customdata[1]:.2f}<extra></extra>'
+  }],{margin:{l:105,r:25,t:10,b:42},xaxis:{title:'Coeficiente por +10 µg/m³',zeroline:true,zerolinecolor:'#33485d',gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'}});
+
+  const ps=D.pm25_panel_stats[selected];
+  const full=ps?.full, sens=ps?.exclude_2020_2021, diff=ps?.first_difference;
+  $('#envPanelTitle').textContent=`Efeito fixo · ${envPanelOutcomeLabels[selected]}`;
+  $('#envPanelSummaryTitle').textContent=`PM2,5 × ${envPanelOutcomeLabels[selected]}`;
+  const psig=$('#envPanelSig');
+  psig.textContent=full?.p<.05?'associação detectável':'evidência insuficiente';
+  psig.style.background=full?.p<.05?'#e8f8f1':'#f2f5f8';
+  psig.style.color=full?.p<.05?'#176c49':'#647486';
+
+  $('#envPanelSummaryBody').innerHTML=full?`
+    <div class="model-row"><div><b>Modelo completo</b><span>efeitos fixos de capital e ano</span></div><span class="model-value">${pp(full.coef*10,2)} / +10 µg/m³</span></div>
+    <div class="model-row"><div><b>IC95%</b><span>incerteza do coeficiente estimado</span></div><span class="model-value">${f(full.ci_low*10,2)} a ${f(full.ci_high*10,2)}</span></div>
+    <div class="model-row"><div><b>Significância</b><span>teste do coeficiente</span></div><span class="model-value">p ${fp(full.p)}</span></div>
+    <div class="model-row"><div><b>R² do modelo</b><span>ajuste global informado na análise</span></div><span class="model-value">${f(full.r2,3)}</span></div>
+    <div class="model-row"><div><b>Sem 2020–2021</b><span>sensibilidade ao período pandêmico</span></div><span class="model-value">${sens?pp(sens.coef*10,2):'—'}</span></div>
+    <div class="model-row"><div><b>Primeira diferença</b><span>mudanças anuais dentro da capital</span></div><span class="model-value">${diff?'p '+fp(diff.p_coef):'—'}</span></div>
+  `:'<div class="model-row"><div><b>Sem resultado</b><span>não há estimativa disponível para este grupo.</span></div></div>';
+
+  $('#envCaveat').textContent=`No piloto de 12 capitais, a associação é entre médias de exposição e médias de mortalidade de 2010–2019; esse conjunto permite geral, 60–69, 70–79 e 80+. O painel anual de 7 capitais permite também masculino e feminino e controla características fixas da capital e do ano, mas ainda tem apenas 42 observações e 7 cidades. Os resultados são ecológicos e exploratórios, não causais.`;
 }
 
 function renderModels(){
