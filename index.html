@@ -6,21 +6,21 @@
   <meta name="theme-color" content="#07111f">
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
-  <link rel="stylesheet" href="v3/assets/style.css?v=13">
+  <link rel="stylesheet" href="v3/assets/style.css?v=14">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-gz-part-01.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-02.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-03.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-04.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-05.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-06.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-07.js?v=13"></script>
-  <script defer src="v3/assets/data-gz-part-08.js?v=13"></script>
-  <script defer src="v3/assets/data-loader.js?v=13"></script>
-  <script defer src="v3/assets/pm25-capitais-data.js?v=13"></script>
-  <script defer src="v3/assets/scope-trends-data.js?v=13"></script>
-  <script defer src="v3/assets/app-core.js?v=13"></script>
-  <script defer src="v3/assets/app-modules.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-01.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-02.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-03.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-04.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-05.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-06.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-07.js?v=14"></script>
+  <script defer src="v3/assets/data-gz-part-08.js?v=14"></script>
+  <script defer src="v3/assets/data-loader.js?v=14"></script>
+  <script defer src="v3/assets/pm25-capitais-data.js?v=14"></script>
+  <script defer src="v3/assets/scope-trends-data.js?v=14"></script>
+  <script defer src="v3/assets/app-core.js?v=14"></script>
+  <script defer src="v3/assets/app-modules.js?v=14"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -181,10 +181,10 @@
         <section class="page" id="page-quality">
           <div class="section-intro"><div><span class="section-kicker">NÃO ESCONDER PROBLEMAS DO DADO</span><h2>Cobertura, anomalias e limites</h2><p>Uma plataforma científica confiável mostra onde os dados são fortes e onde exigem auditoria antes da interpretação.</p></div></div>
           <div class="dashboard-grid equal">
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">COMPLETUDE</span><h3>Cobertura por indicador</h3></div></div><div class="plot tall" id="coveragePlot"></div></article>
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">SINAL DE ALERTA</span><h3>Macapá 2023</h3></div></div><div class="quality-callout"><strong>12,54 → 1,34</strong><span>queda de 11,2 pontos percentuais entre 2022 e 2023</span><p>É uma ruptura muito maior que a variabilidade histórica da própria capital. Deve ser auditada em origem antes de sustentar qualquer conclusão sobre a Região Norte no pós-2022.</p></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">COMPLETUDE DO ESCOPO</span><h3 id="coverageTitle">Cobertura por indicador</h3></div><div class="panel-note" id="coverageNote">—</div></div><div class="plot tall" id="coveragePlot"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">SINAL DE ALERTA · ESCOPO SELECIONADO</span><h3 id="qualityAlertTitle">—</h3></div></div><div class="quality-callout"><strong id="qualityAlertValues">—</strong><span id="qualityAlertDelta">—</span><p id="qualityAlertText">—</p></div></article>
           </div>
-          <article class="panel table-panel"><div class="panel-head"><div><span class="section-kicker">DETECÇÃO ROBUSTA</span><h3>Maiores mudanças ano a ano</h3></div><div class="panel-note">modified z-score / variação absoluta</div></div><div class="table-wrap"><table><thead><tr><th>Capital</th><th>Período</th><th>Antes</th><th>Depois</th><th>Δ p.p.</th><th>z modificado</th></tr></thead><tbody id="anomalyBody"></tbody></table></div></article>
+          <article class="panel table-panel"><div class="panel-head"><div><span class="section-kicker">DETECÇÃO ROBUSTA · ESCOPO SELECIONADO</span><h3 id="anomalyTableTitle">Maiores mudanças ano a ano</h3></div><div class="panel-note">modified z-score dentro de cada capital / variação absoluta</div></div><div class="table-wrap"><table><thead><tr><th>Capital</th><th>Período</th><th>Antes</th><th>Depois</th><th>Δ p.p.</th><th>z modificado</th></tr></thead><tbody id="anomalyBody"></tbody></table></div></article>
         </section>
 
         <section class="page" id="page-methods">
