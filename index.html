@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#07111f">
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
-  <link rel="stylesheet" href="v3/assets/style.css?v=8">
+  <link rel="stylesheet" href="v3/assets/style.css?v=9">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-gz-part-01.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-02.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-03.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-04.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-05.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-06.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-07.js?v=8"></script>
-  <script defer src="v3/assets/data-gz-part-08.js?v=8"></script>
-  <script defer src="v3/assets/data-loader.js?v=8"></script>
-  <script defer src="v3/assets/app-core.js?v=8"></script>
-  <script defer src="v3/assets/app-modules.js?v=8"></script>
+  <script defer src="v3/assets/data-gz-part-01.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-02.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-03.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-04.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-05.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-06.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-07.js?v=9"></script>
+  <script defer src="v3/assets/data-gz-part-08.js?v=9"></script>
+  <script defer src="v3/assets/data-loader.js?v=9"></script>
+  <script defer src="v3/assets/app-core.js?v=9"></script>
+  <script defer src="v3/assets/app-modules.js?v=9"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -43,7 +43,7 @@
 
       <div class="sidebar-foot">
         <span class="status-dot"></span>
-        <div><b>Base carregada</b><small>27 capitais · 2008–2025</small></div>
+        <div><b>Base carregada</b><small>27 capitais · 2008–2025</small><small>Ernandes Sobreira · Letícia Zen</small></div>
       </div>
     </aside>
 
@@ -180,6 +180,15 @@
 
         <section class="page" id="page-methods">
           <div class="section-intro"><div><span class="section-kicker">TRANSPARÊNCIA REPRODUTÍVEL</span><h2>Método, fontes e interpretação</h2><p>Os resultados devem ser lidos como análise ecológica de mortalidade hospitalar cardiovascular, e não como risco populacional de morte nem como efeito causal individual.</p></div></div>
+          <article class="panel source-panel">
+            <div class="panel-head"><div><span class="section-kicker">SOBRE A PLATAFORMA</span><h3>CardioClima BR</h3></div></div>
+            <div class="source-list">
+              <div><b>Desenvolvimento</b><span>Plataforma desenvolvida por <strong>Ernandes Sobreira</strong> e <strong>Letícia Zen</strong>.</span></div>
+              <div><b>Objetivo</b><span>Organizar, visualizar e explorar as tendências da mortalidade hospitalar por doenças cardiovasculares nas capitais brasileiras e investigar, de forma ecológica e exploratória, possíveis relações com exposições ambientais. A plataforma busca facilitar a comparação entre capitais, regiões, grupos demográficos e períodos, além de tornar visíveis a qualidade, a cobertura e as limitações dos dados.</span></div>
+              <div><b>Escopo</b><span>27 capitais brasileiras, com série de saúde de 2008 a 2025 e módulos ambientais específicos conforme a disponibilidade das bases utilizadas.</span></div>
+            </div>
+          </article>
+
           <div class="method-grid">
             <article class="method-card"><span>01</span><h3>Desfecho</h3><p>Taxa de mortalidade hospitalar por doenças do aparelho circulatório (CID-10, Capítulo IX), por local de residência.</p></article>
             <article class="method-card"><span>02</span><h3>Tendência</h3><p>OLS com erro HAC(1), APC log-linear e Theil–Sen. p-valores entre capitais são ajustados por Benjamini–Hochberg (FDR).</p></article>
@@ -189,7 +198,7 @@
           <article class="panel source-panel">
             <div class="panel-head"><div><span class="section-kicker">FONTES</span><h3>De onde vêm os dados</h3></div></div>
             <div class="source-list">
-              <div><b>Saúde</b><span>Ministério da Saúde — SIH/SUS · doenças do aparelho circulatório.</span></div>
+              <div><b>Saúde</b><span>Dados do Ministério da Saúde, por meio do Sistema de Informações Hospitalares do SUS (SIH/SUS), referentes às doenças do aparelho circulatório (CID-10, Capítulo IX).</span></div>
               <div><b>PM2,5 piloto</b><a href="https://doi.org/10.1590/0102-311XEN131422" target="_blank" rel="noreferrer">Artigo / conjunto utilizado no piloto 2010–2019</a></div>
               <div><b>PM2,5 anual</b><a href="https://doi.org/10.1016/j.tox.2026.154401" target="_blank" rel="noreferrer">Artigo / conjunto anual amazônico 2018–2023</a></div>
             </div>
