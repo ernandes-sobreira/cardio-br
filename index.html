@@ -6,20 +6,21 @@
   <meta name="theme-color" content="#07111f">
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
-  <link rel="stylesheet" href="v3/assets/style.css?v=12">
+  <link rel="stylesheet" href="v3/assets/style.css?v=13">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-gz-part-01.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-02.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-03.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-04.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-05.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-06.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-07.js?v=12"></script>
-  <script defer src="v3/assets/data-gz-part-08.js?v=12"></script>
-  <script defer src="v3/assets/data-loader.js?v=12"></script>
-  <script defer src="v3/assets/pm25-capitais-data.js?v=12"></script>
-  <script defer src="v3/assets/app-core.js?v=12"></script>
-  <script defer src="v3/assets/app-modules.js?v=12"></script>
+  <script defer src="v3/assets/data-gz-part-01.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-02.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-03.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-04.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-05.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-06.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-07.js?v=13"></script>
+  <script defer src="v3/assets/data-gz-part-08.js?v=13"></script>
+  <script defer src="v3/assets/data-loader.js?v=13"></script>
+  <script defer src="v3/assets/pm25-capitais-data.js?v=13"></script>
+  <script defer src="v3/assets/scope-trends-data.js?v=13"></script>
+  <script defer src="v3/assets/app-core.js?v=13"></script>
+  <script defer src="v3/assets/app-modules.js?v=13"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -110,17 +111,17 @@
 
         <section class="page" id="page-trends">
           <div class="section-intro">
-            <div><span class="section-kicker">TENDÊNCIA ≠ DOIS PONTOS</span><h2>Quanto a taxa muda por ano — e com que confiança?</h2><p>Inclinação linear com erro HAC, APC log-linear, estimador robusto de Theil–Sen e correção FDR de Benjamini–Hochberg para os testes entre capitais.</p></div>
-            <div class="method-chip">n = 18 anos por capital, quando completo</div>
+            <div><span class="section-kicker">TENDÊNCIA ≠ DOIS PONTOS</span><h2>Quanto a taxa muda por ano — e com que confiança?</h2><p>Para uma capital individual: inclinação linear com erro HAC(1), APC log-linear, Theil–Sen e FDR de Benjamini–Hochberg entre capitais. Em “Todas as capitais”, a série é a média anual das capitais do escopo selecionado e recebe uma tendência própria; o FDR não se aplica ao agregado.</p></div>
+            <div class="method-chip">2008–2025 · até 18 anos por série</div>
           </div>
 
           <div class="dashboard-grid two-thirds">
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">CAPITAL SELECIONADA</span><h3 id="capitalTrendTitle">—</h3></div><span id="capitalTrendBadge" class="trend-badge">—</span></div><div class="plot tall" id="capitalTrendPlot"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker">ESCOPO SELECIONADO</span><h3 id="capitalTrendTitle">—</h3></div><span id="capitalTrendBadge" class="trend-badge">—</span></div><div class="plot tall" id="capitalTrendPlot"></div></article>
             <article class="panel metric-stack" id="capitalTrendMetrics"></article>
           </div>
 
           <article class="panel">
-            <div class="panel-head"><div><span class="section-kicker">27 CAPITAIS</span><h3>Inclinação anual e IC95%</h3></div><div class="panel-note">ordenado pela inclinação</div></div>
+            <div class="panel-head"><div><span class="section-kicker" id="trendForestScope">27 CAPITAIS</span><h3>Inclinação anual e IC95%</h3></div><div class="panel-note">capitais do escopo · ordenado pela inclinação</div></div>
             <div class="plot xl" id="slopeForest"></div>
           </article>
 
@@ -198,17 +199,22 @@
           </article>
 
           <div class="method-grid">
-            <article class="method-card"><span>01</span><h3>Desfecho</h3><p>Taxa de mortalidade hospitalar por doenças do aparelho circulatório (CID-10, Capítulo IX), por local de residência.</p></article>
-            <article class="method-card"><span>02</span><h3>Tendência</h3><p>OLS com erro HAC(1), APC log-linear e Theil–Sen. p-valores entre capitais são ajustados por Benjamini–Hochberg (FDR).</p></article>
-            <article class="method-card"><span>03</span><h3>Segmentação</h3><p>Efeitos fixos de capital + termo temporal + nível em 2020 + mudança de inclinação pós-2020; SE agrupado por capital.</p></article>
-            <article class="method-card"><span>04</span><h3>Ambiente</h3><p>Piloto PM2,5 com correlação Pearson/Spearman, regressão robusta HC1 e leave-one-out; painel anual com efeitos fixos de capital e ano.</p></article>
+            <article class="method-card"><span>01</span><h3>Desfecho</h3><p>Taxa de mortalidade hospitalar por doenças do aparelho circulatório — CID-10, Capítulo IX. É um indicador condicionado às internações hospitalares e não uma taxa populacional de mortalidade.</p></article>
+            <article class="method-card"><span>02</span><h3>Tendência</h3><p>Capital individual: OLS com erro HAC(1), APC log-linear e Theil–Sen; FDR de Benjamini–Hochberg entre capitais. Brasil/região: a série anual é a média simples das capitais do escopo e a tendência é recalculada sobre essa série agregada.</p></article>
+            <article class="method-card"><span>03</span><h3>Segmentação</h3><p>Efeitos fixos de capital + termo temporal + nível em 2020 + mudança de inclinação pós-2020; erros-padrão agrupados por capital.</p></article>
+            <article class="method-card"><span>04</span><h3>Ambiente</h3><p>PM2,5 diário municipal CAMS/EAC4, 2008–2024 no recorte da plataforma. Associação bruta por Pearson/Spearman e painel longitudinal com efeitos fixos de capital e ano, incluindo análise sem 2020–2021 e primeira diferença.</p></article>
           </div>
           <article class="panel source-panel">
             <div class="panel-head"><div><span class="section-kicker">FONTES</span><h3>De onde vêm os dados</h3></div></div>
             <div class="source-list">
-              <div><b>Saúde</b><span>Dados do Ministério da Saúde, por meio do Sistema de Informações Hospitalares do SUS (SIH/SUS), referentes às doenças do aparelho circulatório (CID-10, Capítulo IX).</span></div>
-              <div><b>PM2,5 nacional</b><a href="https://doi.org/10.5281/zenodo.16374139" target="_blank" rel="noreferrer">CAMS/EAC4 · Fundação Oswaldo Cruz · municípios brasileiros · 2003–2024</a></div>
-              <div><b>Recorte utilizado</b><span>27 capitais brasileiras · 2008–2024 · 167.670 registros diários e 459 capital-anos.</span></div>
+              <div><b>Saúde — origem</b><span>Ministério da Saúde — Sistema de Informações Hospitalares do SUS (SIH/SUS), Capítulo IX da CID-10 (Doenças do aparelho circulatório). O pacote atual contém 27 capitais × 18 anos = 486 registros anuais, de 2008 a 2025.</span></div>
+              <div><b>Saúde — rastreabilidade</b><span>Os metadados preservados no repositório registram a fonte SIH/SUS, o período 2008–2025 e a geração do pacote em 09/09/2026. A URL/consulta original do TabNet e a data original de download não foram preservadas no projeto; por isso a plataforma não atribui uma rota de extração não documentada.</span></div>
+              <div><b>PM2,5 — fonte original</b><a href="https://doi.org/10.5281/zenodo.16374139" target="_blank" rel="noreferrer">Saldanha et al. · PM2.5 daily averages of Brazilian municipalities: 2003–2024 · Zenodo / Fundação Oswaldo Cruz · DOI 10.5281/zenodo.16374139</a></div>
+              <div><b>PM2,5 — período da fonte</b><span>01/01/2003 a 31/12/2024. A fonte usa a reanálise global CAMS/EAC4 do Copernicus para calcular estatísticas zonais de PM2,5 nos limites oficiais dos municípios brasileiros.</span></div>
+              <div><b>PM2,5 — arquivo usado</b><span><code>pm25_mean_mean.parquet</code> · MD5 <code>bb4031181cf7fab6c74a3eedae9ce284</code>. O arquivo contém a média diária municipal em µg/m³.</span></div>
+              <div><b>PM2,5 — como foi extraído</b><span>O processamento público da fonte calcula a média horária do PM2,5 e depois a média das células que interceptam cada município. O código da fonte usa limites municipais de 2010 via <code>geobr</code>, extração zonal com <code>exactextractr</code> e conversão de kg/m³ para µg/m³.</span></div>
+              <div><b>PM2,5 — recorte CardioClima</b><span>Foram filtrados os códigos IBGE das 27 capitais e as datas de 01/01/2008 a 31/12/2024. Resultado: 167.670 registros diários e 459 registros capital-ano. A partir dos dias foram calculadas média, mediana, P95, P99, máximo e porcentagens de dias acima de 15 e 25 µg/m³.</span></div>
+              <div><b>Por que PM2,5 termina em 2024?</b><span>A série 2003–2024 é completa até 31/12/2024. Existe uma base separada de 2025, DOI 10.5281/zenodo.22049365, mas atualmente cobre somente 01/01/2025 a 31/08/2025; ela não foi misturada aos anos completos.</span></div>
             </div>
           </article>
           <div class="download-grid">
@@ -216,7 +222,7 @@
             <a href="v3/data/pm25_capitais_anual_2008_2024.csv" download><b>PM2,5 anual — 27 capitais</b><span>CSV · 459 capital-anos</span></a>
             <a href="v3/data/pm25_capitais_diario_2008_2024.csv" download><b>PM2,5 diário — 27 capitais</b><span>CSV · 167.670 registros</span></a>
           </div>
-          <div class="final-note"><b>Próxima integração planejada:</b> temperatura, extremos de calor, umidade/VPD, precipitação e PM2,5 para todas as capitais, mantendo o mesmo desenho de auditoria e sensibilidade.</div>
+          <div class="final-note"><b>Reprodutibilidade:</b> os CSVs diário e anual de PM2,5 podem ser baixados acima. O repositório também mantém o script que baixa o Parquet do Zenodo, valida o MD5, filtra as 27 capitais e refaz as agregações e modelos. Para a saúde, a fonte e o período estão documentados, mas a consulta original de extração precisa ser recuperada para completar a cadeia de proveniência.</div>
         </section>
       </div>
     </main>
