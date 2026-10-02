@@ -299,10 +299,107 @@ function renderModels(){
     <div class="model-row"><div><b>Primeira diferença</b><span>mudança anual dentro da capital</span></div><span class="model-value">${diff?pp(diff.coef*10,2)+' · p '+fp(diff.p):'—'}</span></div>`;
 }
 
+function median(values){
+  const a=[...values].filter(v=>v!=null&&Number.isFinite(+v)).map(Number).sort((x,y)=>x-y);
+  if(!a.length) return null;
+  const m=Math.floor(a.length/2);
+  return a.length%2?a[m]:(a[m-1]+a[m])/2;
+}
+
+function qualityCoverage(){
+  const rows=scopedRows();
+  const total=rows.length;
+  return Object.entries(D.outcomes).map(([key,meta])=>{
+    const n=rows.filter(r=>safe(r[key])!=null).length;
+    return {key,label:meta.label,group:meta.group,n,total,coverage_pct:total?100*n/total:0};
+  }).sort((a,b)=>a.coverage_pct-b.coverage_pct);
+}
+
+function qualityAnomalies(){
+  const outcome=state.outcome;
+  const rows=scopedRows().filter(r=>safe(r[outcome])!=null);
+  const capitals=[...new Set(rows.map(r=>r.Capital))];
+  const out=[];
+
+  capitals.forEach(capital=>{
+    const s=rows.filter(r=>r.Capital===capital)
+      .sort((a,b)=>a.Ano-b.Ano)
+      .map(r=>({year:+r.Ano,value:safe(r[outcome])}))
+      .filter(d=>d.value!=null);
+
+    const diffs=[];
+    for(let i=1;i<s.length;i++){
+      if(s[i].year!==s[i-1].year+1) continue;
+      diffs.push({
+        capital,
+        from:s[i-1].year,
+        to:s[i].year,
+        before:s[i-1].value,
+        after:s[i].value,
+        delta:s[i].value-s[i-1].value
+      });
+    }
+    const med=median(diffs.map(d=>d.delta));
+    const mad=med==null?null:median(diffs.map(d=>Math.abs(d.delta-med)));
+    diffs.forEach(d=>{
+      d.modified_z=mad&&mad>0?0.6745*(d.delta-med)/mad:null;
+      out.push(d);
+    });
+  });
+
+  return out.sort((a,b)=>{
+    const az=a.modified_z==null?-1:Math.abs(a.modified_z);
+    const bz=b.modified_z==null?-1:Math.abs(b.modified_z);
+    if(bz!==az) return bz-az;
+    return Math.abs(b.delta)-Math.abs(a.delta);
+  });
+}
+
 function renderQuality(){
-  const m=[...D.missingness].sort((a,b)=>a.coverage_pct-b.coverage_pct);
-  plot('coveragePlot',[{x:m.map(d=>d.coverage_pct),y:m.map(d=>d.label),type:'bar',orientation:'h',marker:{color:m.map(d=>d.coverage_pct<50?colors.red:d.coverage_pct<80?colors.amber:colors.teal)},text:m.map(d=>`${f(d.coverage_pct,1)}%`),textposition:'outside',hovertemplate:'<b>%{y}</b><br>cobertura %{x:.1f}%<extra></extra>'}],{height:Math.max(400,m.length*22),margin:{l:120,r:48,t:10,b:40},xaxis:{range:[0,106],title:'Cobertura (%)',gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'},showlegend:false});
-  $('#anomalyBody').innerHTML=D.anomalies.slice(0,18).map(a=>`<tr><td><b>${a.capital}</b></td><td>${a.from} → ${a.to}</td><td>${f(a.before)}</td><td>${f(a.after)}</td><td>${pp(a.delta,2)}</td><td>${f(a.modified_z,2)}</td></tr>`).join('');
+  const cov=qualityCoverage();
+  const scope=scopeName();
+  $('#coverageTitle').textContent=`Cobertura por indicador · ${scope}`;
+  $('#coverageNote').textContent=`${scopedRows().length} registros capital-ano no escopo`;
+  plot('coveragePlot',[{
+    x:cov.map(d=>d.coverage_pct),y:cov.map(d=>d.label),type:'bar',orientation:'h',
+    marker:{color:cov.map(d=>d.coverage_pct<50?colors.red:d.coverage_pct<80?colors.amber:colors.teal)},
+    text:cov.map(d=>`${f(d.coverage_pct,1)}%`),textposition:'outside',
+    customdata:cov.map(d=>[d.n,d.total,d.group]),
+    hovertemplate:'<b>%{y}</b><br>cobertura %{x:.1f}%<br>%{customdata[0]}/%{customdata[1]} registros<br>%{customdata[2]}<extra></extra>'
+  }],{
+    height:Math.max(400,cov.length*22),margin:{l:120,r:48,t:10,b:40},
+    xaxis:{range:[0,106],title:'Cobertura (%)',gridcolor:'#edf2f6'},
+    yaxis:{gridcolor:'rgba(0,0,0,0)'},showlegend:false
+  });
+
+  const anomalies=qualityAnomalies();
+  const top=anomalies[0];
+  const label=outcomeLabel(state.outcome);
+
+  if(top){
+    const direction=top.delta<0?'queda':'aumento';
+    $('#qualityAlertTitle').textContent=`${top.capital} · ${top.from} → ${top.to}`;
+    $('#qualityAlertValues').textContent=`${f(top.before,2)} → ${f(top.after,2)}`;
+    $('#qualityAlertDelta').textContent=`${direction} de ${f(Math.abs(top.delta),2)} pontos percentuais · ${label}`;
+    $('#qualityAlertText').textContent=top.modified_z==null
+      ? `Esta é a maior mudança ano a ano encontrada no escopo ${scope} para ${label}. O MAD das variações da capital não permite um z modificado estável; interprete pela magnitude e confira a série original.`
+      : `Esta é a ruptura mais extrema no escopo ${scope} para ${label}, considerando o z modificado calculado dentro da própria série de ${top.capital} (|z| = ${f(Math.abs(top.modified_z),2)}). O alerta serve para auditoria do dado, não para concluir que a mudança seja erro ou efeito causal.`;
+  } else {
+    $('#qualityAlertTitle').textContent=`${scope} · ${label}`;
+    $('#qualityAlertValues').textContent='—';
+    $('#qualityAlertDelta').textContent='Sem pares de anos consecutivos suficientes';
+    $('#qualityAlertText').textContent='Não há dados suficientes no escopo selecionado para calcular mudanças ano a ano.';
+  }
+
+  $('#anomalyTableTitle').textContent=`Maiores mudanças · ${scope} · ${label}`;
+  $('#anomalyBody').innerHTML=anomalies.slice(0,18).map(a=>`<tr>
+    <td><b>${a.capital}</b></td>
+    <td>${a.from} → ${a.to}</td>
+    <td>${f(a.before)}</td>
+    <td>${f(a.after)}</td>
+    <td>${pp(a.delta,2)}</td>
+    <td>${a.modified_z==null?'—':f(a.modified_z,2)}</td>
+  </tr>`).join('');
 }
 
 function renderPage(p){ if(p==='overview')renderOverview(); if(p==='trends')renderTrends(); if(p==='profiles')renderProfiles(); if(p==='environment')renderEnvironment(); if(p==='models')renderModels(); if(p==='quality')renderQuality(); }
