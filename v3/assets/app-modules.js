@@ -34,98 +34,183 @@ function renderProfiles(){
   plot('raceCoverage',[{x:race.map(d=>d.coverage_pct),y:race.map(d=>d.label),type:'bar',orientation:'h',marker:{color:race.map(d=>d.coverage_pct<70?colors.amber:colors.teal)},text:race.map(d=>`${f(d.coverage_pct,1)}%`),textposition:'outside'}],{margin:{l:100,r:45,t:10,b:40},xaxis:{range:[0,105],title:'Cobertura (%)',gridcolor:'#edf2f6'},showlegend:false});
 }
 
-const envExposureLabels={'PM2,5 média (µg/m³)':'PM2,5 média','PM2,5 média seca (µg/m³)':'PM2,5 média — estação seca','PM2,5 P99 (µg/m³)':'PM2,5 P99','Dias PM2,5 >15 (%)':'Dias > 15 µg/m³'};
-const envOutcomeLabels={'Mortalidade geral média 2010–2019':'Mortalidade geral','60–69 média':'60–69 anos','70–79 média':'70–79 anos','80+ média':'80+ anos'};
-const envPanelOutcomeLabels={'Mortalidade geral':'Mortalidade geral','Masculino':'Masculino','Feminino':'Feminino','60–69':'60–69 anos','70–79':'70–79 anos','80+':'80+ anos'};
+const envExposureLabels = {
+  pm25_media:'PM2,5 média anual (µg/m³)',
+  pm25_p95:'PM2,5 P95 diário (µg/m³)',
+  pm25_p99:'PM2,5 P99 diário (µg/m³)',
+  dias_acima_15_pct:'Dias > 15 µg/m³ (%)',
+  dias_acima_25_pct:'Dias > 25 µg/m³ (%)'
+};
 
 function setupEnvControls(){
-  const ex=$('#envExposure'), oy=$('#envOutcome'), py=$('#envPanelOutcome'), run=$('#envRun');
-  ex.innerHTML=Object.entries(envExposureLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-  oy.innerHTML=Object.entries(envOutcomeLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-  py.innerHTML=Object.entries(envPanelOutcomeLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-  ex.value=state.envExposure; oy.value=state.envOutcome; py.value=state.envPanelOutcome;
+  const P=window.CARDIOCLIMA_PM25_ALL;
+  const ex=$('#envExposure'), oy=$('#envOutcome'), run=$('#envRun');
+  if(!P){
+    $('#envRunStatus').textContent='Base nacional de PM2,5 não carregada.';
+    run.disabled=true;
+    return;
+  }
+
+  ex.innerHTML=Object.entries(P.exposures||envExposureLabels)
+    .map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+
+  const groups=['Geral','Sexo','Idade','Raça/cor'];
+  oy.innerHTML='';
+  groups.forEach(g=>{
+    const entries=Object.entries(P.outcomes||{}).filter(([,m])=>m.group===g);
+    if(!entries.length) return;
+    const og=document.createElement('optgroup'); og.label=g;
+    entries.forEach(([v,m])=>{
+      const o=document.createElement('option');
+      o.value=v; o.textContent=m.label||v; og.appendChild(o);
+    });
+    oy.appendChild(og);
+  });
+
+  if(!(state.envExposure in P.exposures)) state.envExposure='pm25_media';
+  if(!(state.envOutcome in P.outcomes)) state.envOutcome='Taxa mortalidade geral';
+  ex.value=state.envExposure;
+  oy.value=state.envOutcome;
 
   run.addEventListener('click',()=>{
     state.envExposure=ex.value;
     state.envOutcome=oy.value;
-    state.envPanelOutcome=py.value;
     renderEnvironment();
-    const status=$('#envRunStatus');
-    status.innerHTML=`Análise calculada: <b>${envExposureLabels[state.envExposure]}</b> × <b>${envOutcomeLabels[state.envOutcome]}</b>; painel anual destacado para <b>${envPanelOutcomeLabels[state.envPanelOutcome]}</b>.`;
+    const meta=P.meta||{};
+    $('#envRunStatus').innerHTML=`Análise recalculada: <b>${P.exposures[state.envExposure]}</b> × <b>${P.outcomes[state.envOutcome]?.label||state.envOutcome}</b> · ${meta.n_capitals||27} capitais · ${meta.period||'2008–2024'}.`;
   });
 }
 
+function envScaleInfo(xk){
+  if(String(xk).endsWith('_pct')) return {scale:10,label:'+10 p.p. de dias'};
+  return {scale:10,label:'+10 µg/m³'};
+}
+
+function envMergedRows(xk,yk){
+  const P=window.CARDIOCLIMA_PM25_ALL;
+  if(!P) return [];
+  const healthMap=new Map(D.mortality.map(r=>[`${r.Capital}|${r.Ano}`,r]));
+  return P.annual.map(pm=>{
+    const h=healthMap.get(`${pm.Capital}|${pm.Ano}`);
+    const y=h?safe(h[yk]):null;
+    const x=safe(pm[xk]);
+    return {pm,h,x,y,Capital:pm.Capital,Ano:pm.Ano,Região:pm['Região']};
+  }).filter(r=>r.x!=null&&r.y!=null);
+}
+
 function renderEnvironment(){
-  const xk=state.envExposure, yk=state.envOutcome;
-  const rows=D.pm25_pilot.filter(r=>r[xk]!=null&&r[yk]!=null);
-  const st=D.pm25_pilot_stats?.[xk]?.[yk];
-  if(!rows.length||!st){
-    $('#envMetrics').innerHTML='<div class="metric-block">Não há dados suficientes para esta combinação.</div>';
+  const P=window.CARDIOCLIMA_PM25_ALL;
+  if(!P){
+    $('#envMetrics').innerHTML='<div class="metric-block">Base nacional de PM2,5 não carregada.</div>';
     return;
   }
 
-  const x=rows.map(r=>r[xk]), y=rows.map(r=>r[yk]), fit=linearFit(x,y);
-  const xs=[Math.min(...x),Math.max(...x)], ys=xs.map(v=>fit.intercept+fit.slope*v);
-  const groups=[...new Set(rows.map(r=>r['Região']))];
-  const tr=groups.map(g=>{
-    const rr=rows.filter(r=>r['Região']===g);
-    return {x:rr.map(r=>r[xk]),y:rr.map(r=>r[yk]),text:rr.map(r=>r.Capital),mode:'markers+text',textposition:'top center',name:g,marker:{size:11,color:regionColors[g]||colors.teal,line:{color:'#fff',width:1.5}},hovertemplate:'<b>%{text}</b><br>x %{x:.2f}<br>y %{y:.2f}%<extra></extra>'};
+  const xk=state.envExposure, yk=state.envOutcome;
+  const exposureLabel=P.exposures[xk]||xk;
+  const outcomeMeta=P.outcomes[yk]||{label:yk,group:'Outro'};
+  const rows=envMergedRows(xk,yk);
+  const st=P.stats?.[xk]?.outcomes?.[yk];
+  const fe=st?.fixed_effects?.full;
+  const sens=st?.fixed_effects?.exclude_2020_2021;
+  const diff=st?.fixed_effects?.first_difference;
+  const scale=envScaleInfo(xk);
+
+  if(!rows.length||!st){
+    $('#envMetrics').innerHTML='<div class="metric-block">Não há observações suficientes para esta combinação.</div>';
+    return;
+  }
+
+  const regions=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'];
+  const traces=regions.map(reg=>{
+    const rr=rows.filter(r=>r.Região===reg);
+    return {
+      x:rr.map(r=>r.x),
+      y:rr.map(r=>r.y),
+      text:rr.map(r=>`${r.Capital} · ${r.Ano}`),
+      mode:'markers',
+      type:'scatter',
+      name:reg,
+      marker:{size:7,opacity:.66,color:regionColors[reg]||colors.teal,line:{color:'#fff',width:.6}},
+      hovertemplate:'<b>%{text}</b><br>Exposição: %{x:.2f}<br>Saúde: %{y:.2f}%<extra></extra>'
+    };
+  }).filter(t=>t.x.length);
+
+  const lf=linearFit(rows.map(r=>r.x),rows.map(r=>r.y));
+  const xmin=Math.min(...rows.map(r=>r.x)), xmax=Math.max(...rows.map(r=>r.x));
+  traces.push({
+    x:[xmin,xmax],y:[lf.intercept+lf.slope*xmin,lf.intercept+lf.slope*xmax],
+    mode:'lines',name:'OLS bruta',line:{color:colors.navy,width:2,dash:'dash'},hoverinfo:'skip'
   });
-  tr.push({x:xs,y:ys,mode:'lines',name:'OLS',line:{color:colors.navy,width:2,dash:'dash'},hoverinfo:'skip'});
 
-  $('#envScatterTitle').textContent=`${envExposureLabels[xk]} × ${envOutcomeLabels[yk]}`;
+  $('#envScatterTitle').textContent=`${exposureLabel} × ${outcomeMeta.label}`;
   const sig=$('#envSig');
-  sig.textContent=st.p_pearson<.05?'associação detectável':'evidência fraca';
-  sig.style.background=st.p_pearson<.05?'#e8f8f1':'#f2f5f8';
-  sig.style.color=st.p_pearson<.05?'#176c49':'#647486';
+  if(fe){
+    sig.textContent=fe.p<.05?'efeito fixo: p < 0,05':'efeito fixo: p ≥ 0,05';
+    sig.style.background=fe.p<.05?'#e8f8f1':'#f2f5f8';
+    sig.style.color=fe.p<.05?'#176c49':'#647486';
+  } else {
+    sig.textContent='modelo indisponível';
+  }
 
-  plot('envScatter',tr,{xaxis:{title:envExposureLabels[xk],gridcolor:'#edf2f6'},yaxis:{title:'Taxa hospitalar média (%)',gridcolor:'#edf2f6'},legend:{orientation:'h',y:-.23}});
+  plot('envScatter',traces,{
+    xaxis:{title:exposureLabel,gridcolor:'#edf2f6'},
+    yaxis:{title:`${outcomeMeta.label} · taxa hospitalar (%)`,gridcolor:'#edf2f6'},
+    legend:{orientation:'h',y:-.22}
+  });
+
+  const coefText=fe?pp(fe.coef*scale.scale,2):'—';
+  const ciText=fe?`${f(fe.ci_low*scale.scale,2)} a ${f(fe.ci_high*scale.scale,2)}`:'—';
   $('#envMetrics').innerHTML=`
-    <div class="metric-block emphasis"><span>Pearson</span><strong>r = ${f(st.r,3)}</strong><small>p ${fp(st.p_pearson)} · R² ${f(st.r2,3)}</small></div>
-    <div class="metric-block"><span>Spearman</span><strong>ρ = ${f(st.rho,3)}</strong><small>p ${fp(st.p_spearman)} · associação monotônica</small></div>
-    <div class="metric-block"><span>Regressão HC1</span><strong>${pp(st.slope*10,2)}</strong><small>por +10 unidades da exposição; IC95% ${f(st.ci_low*10,2)} a ${f(st.ci_high*10,2)}</small></div>
-    <div class="metric-block"><span>Leave-one-out</span><strong>r ${f(st.loo_r_min,2)} → ${f(st.loo_r_max,2)}</strong><small>maior p ao retirar uma capital: ${fp(st.loo_p_max)}</small></div>`;
+    <div class="metric-block emphasis"><span>Efeitos fixos</span><strong>${coefText}</strong><small>${scale.label} · IC95% ${ciText} · p ${fe?fp(fe.p):'—'}</small></div>
+    <div class="metric-block"><span>Cobertura</span><strong>${st.capitals} capitais</strong><small>${st.n} capital-anos com dados do grupo selecionado</small></div>
+    <div class="metric-block"><span>Pearson bruto</span><strong>r = ${f(st.pearson?.r,3)}</strong><small>p ${fp(st.pearson?.p)} · não controla diferenças entre capitais/anos</small></div>
+    <div class="metric-block"><span>Spearman bruto</span><strong>ρ = ${f(st.spearman?.rho,3)}</strong><small>p ${fp(st.spearman?.p)} · associação monotônica descritiva</small></div>
+    <div class="metric-block"><span>R² do modelo FE</span><strong>${fe?f(fe.r2,3):'—'}</strong><small>efeitos fixos de capital + ano; SE agrupado por capital</small></div>`;
 
-  const loo=rows.map((r0,i)=>{
-    const rr=rows.filter((_,j)=>j!==i);
-    return {cap:r0.Capital,r:pearson(rr.map(r=>r[xk]),rr.map(r=>r[yk]))};
-  }).sort((a,b)=>a.r-b.r);
-  plot('envLoo',[{x:loo.map(d=>d.r),y:loo.map(d=>d.cap),mode:'markers',marker:{size:9,color:loo.map(d=>d.r>=0?colors.teal:colors.red)},type:'scatter'}],{margin:{l:95,r:25,t:10,b:40},xaxis:{title:'r após excluir a capital',zeroline:true,zerolinecolor:'#607386',gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'}});
+  // Tendência ambiental por região
+  const years=[...new Set(P.annual.map(r=>r.Ano))].sort((a,b)=>a-b);
+  const regTr=regions.map(reg=>{
+    const y=years.map(year=>{
+      const vals=P.annual.filter(r=>r.Região===reg&&r.Ano===year&&r[xk]!=null).map(r=>+r[xk]);
+      return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+    });
+    return {x:years,y,mode:'lines+markers',name:reg,line:{width:2.5,color:regionColors[reg]},marker:{size:4}};
+  });
+  plot('envRegionTrend',regTr,{
+    xaxis:{dtick:2,gridcolor:'#edf2f6'},
+    yaxis:{title:exposureLabel,gridcolor:'#edf2f6'},
+    legend:{orientation:'h',y:-.24}
+  });
 
-  const outs=['Mortalidade geral','Masculino','Feminino','60–69','70–79','80+'];
-  const vals=outs.map(o=>D.pm25_panel_stats[o].full);
-  const selected=state.envPanelOutcome;
-  plot('envFixedEffects',[{
-    x:vals.map(v=>v.coef*10),y:outs,mode:'markers',
-    marker:{
-      size:outs.map(o=>o===selected?15:9),
-      color:outs.map((o,i)=>o===selected?colors.navy:(vals[i].p<.05?colors.red:colors.violet)),
-      line:{color:'#fff',width:1.5}
-    },
-    error_x:{type:'data',symmetric:false,array:vals.map(v=>(v.ci_high-v.coef)*10),arrayminus:vals.map(v=>(v.coef-v.ci_low)*10),color:'#8798a9'},
-    customdata:vals.map(v=>[v.p,v.r2]),
-    hovertemplate:'<b>%{y}</b><br>%{x:.2f} p.p. por +10 µg/m³<br>p %{customdata[0]:.4f}<br>R² modelo %{customdata[1]:.2f}<extra></extra>'
-  }],{margin:{l:105,r:25,t:10,b:42},xaxis:{title:'Coeficiente por +10 µg/m³',zeroline:true,zerolinecolor:'#33485d',gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'}});
+  // Ranking mais recente completo
+  const latest=Math.max(...P.annual.map(r=>r.Ano));
+  const rank=P.annual.filter(r=>r.Ano===latest&&r[xk]!=null)
+    .sort((a,b)=>a[xk]-b[xk]);
+  $('#envRankingTitle').textContent=`Ranking da exposição · ${latest}`;
+  plot('envCapitalRanking',[{
+    x:rank.map(r=>r[xk]),y:rank.map(r=>r.Capital),type:'bar',orientation:'h',
+    marker:{color:rank.map(r=>regionColors[r.Região]||colors.teal)},
+    text:rank.map(r=>f(r[xk],1)),textposition:'outside',
+    hovertemplate:'<b>%{y}</b><br>%{x:.2f}<extra></extra>'
+  }],{
+    height:Math.max(520,rank.length*19),margin:{l:105,r:45,t:10,b:45},
+    xaxis:{title:exposureLabel,gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'},showlegend:false
+  });
 
-  const ps=D.pm25_panel_stats[selected];
-  const full=ps?.full, sens=ps?.exclude_2020_2021, diff=ps?.first_difference;
-  $('#envPanelTitle').textContent=`Efeito fixo · ${envPanelOutcomeLabels[selected]}`;
-  $('#envPanelSummaryTitle').textContent=`PM2,5 × ${envPanelOutcomeLabels[selected]}`;
+  $('#envPanelSummaryTitle').textContent=`${outcomeMeta.label} · efeitos fixos de capital e ano`;
   const psig=$('#envPanelSig');
-  psig.textContent=full?.p<.05?'associação detectável':'evidência insuficiente';
-  psig.style.background=full?.p<.05?'#e8f8f1':'#f2f5f8';
-  psig.style.color=full?.p<.05?'#176c49':'#647486';
+  psig.textContent=fe?(fe.p<.05?'p < 0,05':'p ≥ 0,05'):'—';
+  psig.style.background=fe?.p<.05?'#e8f8f1':'#f2f5f8';
+  psig.style.color=fe?.p<.05?'#176c49':'#647486';
 
-  $('#envPanelSummaryBody').innerHTML=full?`
-    <div class="model-row"><div><b>Modelo completo</b><span>efeitos fixos de capital e ano</span></div><span class="model-value">${pp(full.coef*10,2)} / +10 µg/m³</span></div>
-    <div class="model-row"><div><b>IC95%</b><span>incerteza do coeficiente estimado</span></div><span class="model-value">${f(full.ci_low*10,2)} a ${f(full.ci_high*10,2)}</span></div>
-    <div class="model-row"><div><b>Significância</b><span>teste do coeficiente</span></div><span class="model-value">p ${fp(full.p)}</span></div>
-    <div class="model-row"><div><b>R² do modelo</b><span>ajuste global informado na análise</span></div><span class="model-value">${f(full.r2,3)}</span></div>
-    <div class="model-row"><div><b>Sem 2020–2021</b><span>sensibilidade ao período pandêmico</span></div><span class="model-value">${sens?pp(sens.coef*10,2):'—'}</span></div>
-    <div class="model-row"><div><b>Primeira diferença</b><span>mudanças anuais dentro da capital</span></div><span class="model-value">${diff?'p '+fp(diff.p_coef):'—'}</span></div>
-  `:'<div class="model-row"><div><b>Sem resultado</b><span>não há estimativa disponível para este grupo.</span></div></div>';
+  $('#envPanelSummaryBody').innerHTML=`
+    <div class="model-row"><div><b>Modelo completo 2008–2024</b><span>27 capitais; efeitos fixos de capital e ano</span></div><span class="model-value">${fe?pp(fe.coef*scale.scale,2):'—'} / ${scale.label}</span></div>
+    <div class="model-row"><div><b>IC95% e p</b><span>erros-padrão agrupados por capital</span></div><span class="model-value">${fe?`${f(fe.ci_low*scale.scale,2)} a ${f(fe.ci_high*scale.scale,2)} · p ${fp(fe.p)}`:'—'}</span></div>
+    <div class="model-row"><div><b>Sem 2020–2021</b><span>sensibilidade ao período pandêmico</span></div><span class="model-value">${sens?pp(sens.coef*scale.scale,2)+' · p '+fp(sens.p):'—'}</span></div>
+    <div class="model-row"><div><b>Primeira diferença</b><span>mudanças anuais dentro de cada capital</span></div><span class="model-value">${diff?pp(diff.coef*scale.scale,2)+' · p '+fp(diff.p):'—'}</span></div>
+    <div class="model-row"><div><b>Amostra efetiva</b><span>a cobertura do desfecho pode variar entre grupos</span></div><span class="model-value">${st.n} observações · ${st.capitals} capitais</span></div>`;
 
-  $('#envCaveat').textContent=`No piloto de 12 capitais, a associação é entre médias de exposição e médias de mortalidade de 2010–2019; esse conjunto permite geral, 60–69, 70–79 e 80+. O painel anual de 7 capitais permite também masculino e feminino e controla características fixas da capital e do ano, mas ainda tem apenas 42 observações e 7 cidades. Os resultados são ecológicos e exploratórios, não causais.`;
+  $('#envCaveat').textContent=`A exposição ambiental agora usa uma única fonte para as 27 capitais: reanálise CAMS/EAC4 agregada aos limites municipais, com dados diários de 2008 a 2024. As correlações brutas são descritivas. O modelo longitudinal controla diferenças fixas entre capitais e choques comuns de cada ano, com erros-padrão agrupados por capital. Ainda assim, esta é uma análise ecológica e não estabelece causalidade individual. Para raça/cor e grupos com menor completude, a amostra efetiva aparece explicitamente na tela.`;
 }
 
 function renderModels(){
