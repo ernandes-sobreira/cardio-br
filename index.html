@@ -3,24 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="theme-color" content="#07111f">
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
-  <link rel="stylesheet" href="v3/assets/style.css?v=15">
+  <link rel="stylesheet" href="v3/assets/style.css?v=16">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-gz-part-01.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-02.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-03.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-04.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-05.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-06.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-07.js?v=15"></script>
-  <script defer src="v3/assets/data-gz-part-08.js?v=15"></script>
-  <script defer src="v3/assets/data-loader.js?v=15"></script>
-  <script defer src="v3/assets/pm25-capitais-data.js?v=15"></script>
-  <script defer src="v3/assets/scope-trends-data.js?v=15"></script>
-  <script defer src="v3/assets/app-core.js?v=15"></script>
-  <script defer src="v3/assets/app-modules.js?v=15"></script>
+  <script defer src="v3/assets/data-gz-part-01.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-02.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-03.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-04.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-05.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-06.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-07.js?v=16"></script>
+  <script defer src="v3/assets/data-gz-part-08.js?v=16"></script>
+  <script defer src="v3/assets/data-loader.js?v=16"></script>
+  <script defer src="v3/assets/pm25-capitais-data.js?v=16"></script>
+  <script defer src="v3/assets/scope-trends-data.js?v=16"></script>
+  <script defer src="v3/assets/app-core.js?v=16"></script>
+  <script defer src="v3/assets/app-modules.js?v=16"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -184,6 +187,19 @@
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">COMPLETUDE DO ESCOPO</span><h3 id="coverageTitle">Cobertura por indicador</h3></div><div class="panel-note" id="coverageNote">—</div></div><div class="plot tall" id="coveragePlot"></div></article>
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">SINAL DE ALERTA · ESCOPO SELECIONADO</span><h3 id="qualityAlertTitle">—</h3></div></div><div class="quality-callout"><strong id="qualityAlertValues">—</strong><span id="qualityAlertDelta">—</span><p id="qualityAlertText">—</p></div></article>
           </div>
+          <article class="panel quality-compare-panel" id="qualityComparePanel">
+            <div class="panel-head"><div><span class="section-kicker">COMPARAR CAPITAIS</span><h3>Duas séries lado a lado</h3></div><div class="panel-note">usa o indicador selecionado no topo</div></div>
+            <div class="quality-compare-controls">
+              <label><span>Capital A</span><select id="qualityCompareA"></select></label>
+              <label><span>Capital B</span><select id="qualityCompareB"></select></label>
+              <button type="button" class="env-run" id="qualityCompareRun">COMPARAR</button>
+            </div>
+            <div class="dashboard-grid two-thirds quality-compare-grid">
+              <div class="plot tall" id="qualityComparePlot"></div>
+              <div class="metric-stack" id="qualityCompareSummary"></div>
+            </div>
+          </article>
+
           <article class="panel table-panel"><div class="panel-head"><div><span class="section-kicker">DETECÇÃO ROBUSTA · ESCOPO SELECIONADO</span><h3 id="anomalyTableTitle">Maiores mudanças ano a ano</h3></div><div class="panel-note">modified z-score dentro de cada capital / variação absoluta</div></div><div class="table-wrap"><table><thead><tr><th>Capital</th><th>Período</th><th>Antes</th><th>Depois</th><th>Δ p.p.</th><th>z modificado</th></tr></thead><tbody id="anomalyBody"></tbody></table></div></article>
         </section>
 
