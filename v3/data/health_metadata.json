@@ -1,0 +1,132 @@
+{
+  "packed_meta": {
+    "title": "CardioClima BR",
+    "subtitle": "Mortalidade hospitalar cardiovascular e ambiente nas capitais brasileiras",
+    "period": "2008–2025",
+    "generated": "2026-09-09",
+    "n_rows": 486,
+    "n_capitals": 27,
+    "n_years": 18,
+    "source_health": "Ministério da Saúde — SIH/SUS, Capítulo IX (Doenças do aparelho circulatório)",
+    "note_outcome": "Taxa de mortalidade hospitalar: indicador condicionado às internações, não taxa populacional de óbitos.",
+    "pm25_pilot_source": "https://doi.org/10.1590/0102-311XEN131422",
+    "pm25_panel_source": "https://doi.org/10.1016/j.tox.2026.154401"
+  },
+  "rows": 486,
+  "capitals": 27,
+  "year_start": 2008,
+  "year_end": 2025,
+  "columns": [
+    "Capital",
+    "UF",
+    "Região",
+    "Ano",
+    "Taxa mortalidade geral",
+    "Masc",
+    "Fem",
+    "Menor 1 ano",
+    "1 a 4 anos",
+    "5 a 9 anos",
+    "10 a 14 anos",
+    "15 a 19 anos",
+    "20 a 29 anos",
+    "30 a 39 anos",
+    "40 a 49 anos",
+    "50 a 59 anos",
+    "60 a 69 anos",
+    "70 a 79 anos",
+    "80 anos e mais",
+    "Branca",
+    "Preta",
+    "Parda",
+    "Amarela",
+    "Indígena",
+    "Sem informação"
+  ],
+  "outcomes": {
+    "Taxa mortalidade geral": {
+      "label": "Mortalidade geral",
+      "group": "Geral"
+    },
+    "Masc": {
+      "label": "Masculino",
+      "group": "Sexo"
+    },
+    "Fem": {
+      "label": "Feminino",
+      "group": "Sexo"
+    },
+    "Menor 1 ano": {
+      "label": "< 1 ano",
+      "group": "Idade"
+    },
+    "1 a 4 anos": {
+      "label": "1–4 anos",
+      "group": "Idade"
+    },
+    "5 a 9 anos": {
+      "label": "5–9 anos",
+      "group": "Idade"
+    },
+    "10 a 14 anos": {
+      "label": "10–14 anos",
+      "group": "Idade"
+    },
+    "15 a 19 anos": {
+      "label": "15–19 anos",
+      "group": "Idade"
+    },
+    "20 a 29 anos": {
+      "label": "20–29 anos",
+      "group": "Idade"
+    },
+    "30 a 39 anos": {
+      "label": "30–39 anos",
+      "group": "Idade"
+    },
+    "40 a 49 anos": {
+      "label": "40–49 anos",
+      "group": "Idade"
+    },
+    "50 a 59 anos": {
+      "label": "50–59 anos",
+      "group": "Idade"
+    },
+    "60 a 69 anos": {
+      "label": "60–69 anos",
+      "group": "Idade"
+    },
+    "70 a 79 anos": {
+      "label": "70–79 anos",
+      "group": "Idade"
+    },
+    "80 anos e mais": {
+      "label": "80+ anos",
+      "group": "Idade"
+    },
+    "Branca": {
+      "label": "Branca",
+      "group": "Raça/cor"
+    },
+    "Preta": {
+      "label": "Preta",
+      "group": "Raça/cor"
+    },
+    "Parda": {
+      "label": "Parda",
+      "group": "Raça/cor"
+    },
+    "Amarela": {
+      "label": "Amarela",
+      "group": "Raça/cor"
+    },
+    "Indígena": {
+      "label": "Indígena",
+      "group": "Raça/cor"
+    },
+    "Sem informação": {
+      "label": "Sem informação",
+      "group": "Raça/cor"
+    }
+  }
+}
