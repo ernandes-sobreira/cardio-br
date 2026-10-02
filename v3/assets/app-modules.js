@@ -306,6 +306,65 @@ function median(values){
   return a.length%2?a[m]:(a[m-1]+a[m])/2;
 }
 
+function ensureQualityUI(){
+  const page=$('#page-quality');
+  if(!page) return;
+
+  const grid=page.querySelector('.dashboard-grid.equal');
+  const first=grid?.children?.[0];
+  const second=grid?.children?.[1];
+
+  if(first && !$('#coverageTitle')){
+    const h3=first.querySelector('h3');
+    if(h3){ h3.id='coverageTitle'; h3.textContent='Cobertura por indicador'; }
+    const head=first.querySelector('.panel-head');
+    if(head && !$('#coverageNote')){
+      const note=document.createElement('div');
+      note.className='panel-note'; note.id='coverageNote'; note.textContent='—';
+      head.appendChild(note);
+    }
+  }
+
+  if(second && !$('#qualityAlertTitle')){
+    const h3=second.querySelector('h3');
+    if(h3){ h3.id='qualityAlertTitle'; h3.textContent='—'; }
+    const kicker=second.querySelector('.section-kicker');
+    if(kicker) kicker.textContent='SINAL DE ALERTA · ESCOPO SELECIONADO';
+    const callout=second.querySelector('.quality-callout');
+    const strong=callout?.querySelector('strong');
+    const span=callout?.querySelector('span');
+    const p=callout?.querySelector('p');
+    if(strong) strong.id='qualityAlertValues';
+    if(span) span.id='qualityAlertDelta';
+    if(p) p.id='qualityAlertText';
+  }
+
+  const tablePanel=page.querySelector('.table-panel');
+  if(tablePanel && !$('#anomalyTableTitle')){
+    const h3=tablePanel.querySelector('h3');
+    if(h3){ h3.id='anomalyTableTitle'; h3.textContent='Maiores mudanças ano a ano'; }
+    const kicker=tablePanel.querySelector('.section-kicker');
+    if(kicker) kicker.textContent='DETECÇÃO ROBUSTA · ESCOPO SELECIONADO';
+  }
+
+  if(tablePanel && !$('#qualityComparePanel')){
+    tablePanel.insertAdjacentHTML('beforebegin',`
+      <article class="panel quality-compare-panel" id="qualityComparePanel">
+        <div class="panel-head"><div><span class="section-kicker">COMPARAR CAPITAIS</span><h3>Duas séries lado a lado</h3></div><div class="panel-note">usa o indicador selecionado no topo</div></div>
+        <div class="quality-compare-controls">
+          <label><span>Capital A</span><select id="qualityCompareA"></select></label>
+          <label><span>Capital B</span><select id="qualityCompareB"></select></label>
+          <button type="button" class="env-run" id="qualityCompareRun">COMPARAR</button>
+        </div>
+        <div class="dashboard-grid two-thirds quality-compare-grid">
+          <div class="plot tall" id="qualityComparePlot"></div>
+          <div class="metric-stack" id="qualityCompareSummary"></div>
+        </div>
+      </article>`
+    );
+  }
+}
+
 function qualityCoverage(){
   const rows=scopedRows();
   const total=rows.length;
@@ -315,39 +374,32 @@ function qualityCoverage(){
   }).sort((a,b)=>a.coverage_pct-b.coverage_pct);
 }
 
-function qualityAnomalies(){
-  const outcome=state.outcome;
-  const rows=scopedRows().filter(r=>safe(r[outcome])!=null);
-  const capitals=[...new Set(rows.map(r=>r.Capital))];
-  const out=[];
+function qualityCapitalAnomalies(capital,outcome=state.outcome){
+  const s=D.mortality.filter(r=>r.Capital===capital&&safe(r[outcome])!=null)
+    .sort((a,b)=>a.Ano-b.Ano)
+    .map(r=>({year:+r.Ano,value:safe(r[outcome])}))
+    .filter(d=>d.value!=null);
 
-  capitals.forEach(capital=>{
-    const s=rows.filter(r=>r.Capital===capital)
-      .sort((a,b)=>a.Ano-b.Ano)
-      .map(r=>({year:+r.Ano,value:safe(r[outcome])}))
-      .filter(d=>d.value!=null);
-
-    const diffs=[];
-    for(let i=1;i<s.length;i++){
-      if(s[i].year!==s[i-1].year+1) continue;
-      diffs.push({
-        capital,
-        from:s[i-1].year,
-        to:s[i].year,
-        before:s[i-1].value,
-        after:s[i].value,
-        delta:s[i].value-s[i-1].value
-      });
-    }
-    const med=median(diffs.map(d=>d.delta));
-    const mad=med==null?null:median(diffs.map(d=>Math.abs(d.delta-med)));
-    diffs.forEach(d=>{
-      d.modified_z=mad&&mad>0?0.6745*(d.delta-med)/mad:null;
-      out.push(d);
+  const diffs=[];
+  for(let i=1;i<s.length;i++){
+    if(s[i].year!==s[i-1].year+1) continue;
+    diffs.push({
+      capital,
+      from:s[i-1].year,
+      to:s[i].year,
+      before:s[i-1].value,
+      after:s[i].value,
+      delta:s[i].value-s[i-1].value
     });
+  }
+
+  const med=median(diffs.map(d=>d.delta));
+  const mad=med==null?null:median(diffs.map(d=>Math.abs(d.delta-med)));
+  diffs.forEach(d=>{
+    d.modified_z=mad&&mad>0?0.6745*(d.delta-med)/mad:null;
   });
 
-  return out.sort((a,b)=>{
+  return diffs.sort((a,b)=>{
     const az=a.modified_z==null?-1:Math.abs(a.modified_z);
     const bz=b.modified_z==null?-1:Math.abs(b.modified_z);
     if(bz!==az) return bz-az;
@@ -355,11 +407,117 @@ function qualityAnomalies(){
   });
 }
 
+function qualityAnomalies(){
+  const capitals=[...new Set(scopedRows().map(r=>r.Capital))];
+  return capitals.flatMap(cap=>qualityCapitalAnomalies(cap,state.outcome)).sort((a,b)=>{
+    const az=a.modified_z==null?-1:Math.abs(a.modified_z);
+    const bz=b.modified_z==null?-1:Math.abs(b.modified_z);
+    if(bz!==az) return bz-az;
+    return Math.abs(b.delta)-Math.abs(a.delta);
+  });
+}
+
+function setupQualityCompareControls(){
+  ensureQualityUI();
+  const a=$('#qualityCompareA'), b=$('#qualityCompareB'), run=$('#qualityCompareRun');
+  if(!a||!b||!run) return;
+
+  const caps=Object.keys(D.capitals).sort((x,y)=>x.localeCompare(y,'pt-BR'));
+  const optionHtml=caps.map(cap=>`<option value="${cap}">${cap} · ${D.capitals[cap].uf}</option>`).join('');
+
+  if(!a.options.length) a.innerHTML=optionHtml;
+  if(!b.options.length) b.innerHTML=optionHtml;
+
+  if(state.capital!=='ALL' && caps.includes(state.capital)) a.value=state.capital;
+  if(!a.value) a.value=caps[0]||'';
+  if(!b.value || b.value===a.value){
+    b.value=caps.find(cap=>cap!==a.value)||a.value;
+  }
+
+  if(!run.dataset.bound){
+    run.dataset.bound='1';
+    run.addEventListener('click',renderQualityCompare);
+    a.addEventListener('change',()=>{
+      if(b.value===a.value){
+        const other=caps.find(cap=>cap!==a.value);
+        if(other) b.value=other;
+      }
+    });
+    b.addEventListener('change',()=>{
+      if(a.value===b.value){
+        const other=caps.find(cap=>cap!==b.value);
+        if(other) a.value=other;
+      }
+    });
+  }
+}
+
+function qualityCompareStats(capital){
+  const outcome=state.outcome;
+  const all=D.mortality.filter(r=>r.Capital===capital).sort((a,b)=>a.Ano-b.Ano);
+  const valid=all.filter(r=>safe(r[outcome])!=null);
+  const coverage=all.length?100*valid.length/all.length:0;
+  const t=getTrendForCapital(capital,outcome);
+  const anomaly=qualityCapitalAnomalies(capital,outcome)[0]||null;
+  return {capital,all,valid,coverage,t,anomaly};
+}
+
+function renderQualityCompare(){
+  const a=$('#qualityCompareA'), b=$('#qualityCompareB');
+  const plotEl=$('#qualityComparePlot'), summary=$('#qualityCompareSummary');
+  if(!a||!b||!plotEl||!summary) return;
+
+  const A=qualityCompareStats(a.value);
+  const B=qualityCompareStats(b.value);
+  const outcome=state.outcome;
+  const label=outcomeLabel(outcome);
+
+  const traceFor=(S,color)=>({
+    x:S.valid.map(r=>r.Ano),
+    y:S.valid.map(r=>r[outcome]),
+    mode:'lines+markers',
+    name:S.capital,
+    line:{width:3,color},
+    marker:{size:6},
+    hovertemplate:`<b>${S.capital}</b><br>%{x}<br>%{y:.2f}%<extra></extra>`
+  });
+
+  plot('qualityComparePlot',[
+    traceFor(A,colors.teal),
+    traceFor(B,colors.violet)
+  ],{
+    xaxis:{dtick:2,gridcolor:'#edf2f6'},
+    yaxis:{title:`${label} · taxa hospitalar (%)`,gridcolor:'#edf2f6'},
+    legend:{orientation:'h',y:-.2}
+  });
+
+  function card(S,kind){
+    const t=S.t, an=S.anomaly;
+    const trend=t?`APC ${pct(t.apc,2)}/ano · p ${fp(t.p)} · q ${fp(t.q_fdr)}`:'tendência indisponível';
+    const rupture=an?`${an.from}→${an.to}: ${pp(an.delta,2)} · |z| ${an.modified_z==null?'—':f(Math.abs(an.modified_z),2)}`:'sem ruptura calculável';
+    return `<div class="metric-block ${kind==='A'?'emphasis':''}">
+      <span>Capital ${kind}</span>
+      <strong>${S.capital}</strong>
+      <small>Cobertura ${f(S.coverage,1)}% · ${trend}<br>Maior ruptura: ${rupture}</small>
+    </div>`;
+  }
+
+  summary.innerHTML=
+    card(A,'A')+
+    card(B,'B')+
+    `<div class="metric-block"><span>Leitura</span><strong>${label}</strong><small>A comparação usa exatamente o mesmo indicador e período disponíveis em cada capital. Diferenças de cobertura permanecem explícitas e devem ser consideradas antes de interpretar as curvas.</small></div>`;
+}
+
 function renderQuality(){
+  ensureQualityUI();
+  setupQualityCompareControls();
+
   const cov=qualityCoverage();
   const scope=scopeName();
-  $('#coverageTitle').textContent=`Cobertura por indicador · ${scope}`;
-  $('#coverageNote').textContent=`${scopedRows().length} registros capital-ano no escopo`;
+  const coverageTitle=$('#coverageTitle'), coverageNote=$('#coverageNote');
+  if(coverageTitle) coverageTitle.textContent=`Cobertura por indicador · ${scope}`;
+  if(coverageNote) coverageNote.textContent=`${scopedRows().length} registros capital-ano no escopo`;
+
   plot('coveragePlot',[{
     x:cov.map(d=>d.coverage_pct),y:cov.map(d=>d.label),type:'bar',orientation:'h',
     marker:{color:cov.map(d=>d.coverage_pct<50?colors.red:d.coverage_pct<80?colors.amber:colors.teal)},
@@ -376,22 +534,24 @@ function renderQuality(){
   const top=anomalies[0];
   const label=outcomeLabel(state.outcome);
 
+  const titleEl=$('#qualityAlertTitle'), valuesEl=$('#qualityAlertValues'), deltaEl=$('#qualityAlertDelta'), textEl=$('#qualityAlertText');
   if(top){
     const direction=top.delta<0?'queda':'aumento';
-    $('#qualityAlertTitle').textContent=`${top.capital} · ${top.from} → ${top.to}`;
-    $('#qualityAlertValues').textContent=`${f(top.before,2)} → ${f(top.after,2)}`;
-    $('#qualityAlertDelta').textContent=`${direction} de ${f(Math.abs(top.delta),2)} pontos percentuais · ${label}`;
-    $('#qualityAlertText').textContent=top.modified_z==null
+    if(titleEl) titleEl.textContent=`${top.capital} · ${top.from} → ${top.to}`;
+    if(valuesEl) valuesEl.textContent=`${f(top.before,2)} → ${f(top.after,2)}`;
+    if(deltaEl) deltaEl.textContent=`${direction} de ${f(Math.abs(top.delta),2)} pontos percentuais · ${label}`;
+    if(textEl) textEl.textContent=top.modified_z==null
       ? `Esta é a maior mudança ano a ano encontrada no escopo ${scope} para ${label}. O MAD das variações da capital não permite um z modificado estável; interprete pela magnitude e confira a série original.`
       : `Esta é a ruptura mais extrema no escopo ${scope} para ${label}, considerando o z modificado calculado dentro da própria série de ${top.capital} (|z| = ${f(Math.abs(top.modified_z),2)}). O alerta serve para auditoria do dado, não para concluir que a mudança seja erro ou efeito causal.`;
   } else {
-    $('#qualityAlertTitle').textContent=`${scope} · ${label}`;
-    $('#qualityAlertValues').textContent='—';
-    $('#qualityAlertDelta').textContent='Sem pares de anos consecutivos suficientes';
-    $('#qualityAlertText').textContent='Não há dados suficientes no escopo selecionado para calcular mudanças ano a ano.';
+    if(titleEl) titleEl.textContent=`${scope} · ${label}`;
+    if(valuesEl) valuesEl.textContent='—';
+    if(deltaEl) deltaEl.textContent='Sem pares de anos consecutivos suficientes';
+    if(textEl) textEl.textContent='Não há dados suficientes no escopo selecionado para calcular mudanças ano a ano.';
   }
 
-  $('#anomalyTableTitle').textContent=`Maiores mudanças · ${scope} · ${label}`;
+  const anomalyTitle=$('#anomalyTableTitle');
+  if(anomalyTitle) anomalyTitle.textContent=`Maiores mudanças · ${scope} · ${label}`;
   $('#anomalyBody').innerHTML=anomalies.slice(0,18).map(a=>`<tr>
     <td><b>${a.capital}</b></td>
     <td>${a.from} → ${a.to}</td>
@@ -400,6 +560,8 @@ function renderQuality(){
     <td>${pp(a.delta,2)}</td>
     <td>${a.modified_z==null?'—':f(a.modified_z,2)}</td>
   </tr>`).join('');
+
+  renderQualityCompare();
 }
 
 function renderPage(p){ if(p==='overview')renderOverview(); if(p==='trends')renderTrends(); if(p==='profiles')renderProfiles(); if(p==='environment')renderEnvironment(); if(p==='models')renderModels(); if(p==='quality')renderQuality(); }
