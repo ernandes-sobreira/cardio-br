@@ -29,3 +29,12 @@ button,select,input,a{font:inherit} a{color:inherit}.app-shell{min-height:100vh}
 #envPanelSummary{margin-top:16px}
 @media(max-width:1100px){.env-controls{grid-template-columns:1fr 1fr}.env-run{width:100%}}
 @media(max-width:640px){.env-controls{grid-template-columns:1fr}.env-controls select{width:100%;min-width:0}.env-run-status{grid-column:auto}}
+
+.quality-compare-panel{margin-top:18px}
+.quality-compare-controls{display:grid;grid-template-columns:minmax(210px,1fr) minmax(210px,1fr) auto;gap:12px;align-items:end;margin-top:14px}
+.quality-compare-controls label{display:flex;flex-direction:column;gap:5px}
+.quality-compare-controls label span{font-size:10px;font-weight:800;color:#6b7b8b;text-transform:uppercase;letter-spacing:.08em}
+.quality-compare-controls select{border:1px solid #ccd8e4;border-radius:10px;background:#fff;padding:9px 34px 9px 10px;min-width:180px;color:#152334}
+.quality-compare-grid{align-items:stretch}
+.quality-compare-grid .metric-stack{padding-left:4px}
+@media(max-width:900px){.quality-compare-controls{grid-template-columns:1fr}.quality-compare-controls select{width:100%}.quality-compare-grid{grid-template-columns:1fr!important}}
