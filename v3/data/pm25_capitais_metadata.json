@@ -1,0 +1,14 @@
+{
+  "source_url": "https://zenodo.org/records/16374139/files/pm25_mean_mean.parquet?download=1",
+  "source_md5": "bb4031181cf7fab6c74a3eedae9ce284",
+  "source_doi": "10.5281/zenodo.16374139",
+  "period": "2008-2024",
+  "capitals": 27,
+  "daily_rows": 167670,
+  "annual_rows": 459,
+  "generated_files": [
+    "v3/data/pm25_capitais_diario_2008_2024.csv",
+    "v3/data/pm25_capitais_anual_2008_2024.csv",
+    "v3/assets/pm25-capitais-data.js"
+  ]
+}
