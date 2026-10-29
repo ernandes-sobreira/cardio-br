@@ -11,6 +11,7 @@ const regionColors = {'Norte':'#0b8f8a','Nordeste':'#e69500','Centro-Oeste':'#6d
 const pageTitles = {overview:'Panorama nacional',trends:'Tendências e evidência',profiles:'Perfis demográficos',environment:'Ambiente e PM2,5',models:'Modelos e sensibilidade',quality:'Qualidade dos dados',methods:'Método e dados'};
 
 const state = { page:'overview', outcome:'Taxa mortalidade geral', capital:'ALL', region:'ALL', envExposure:'pm25_media', envOutcome:'Taxa mortalidade geral' };
+window.CARDIOCLIMA_GET_FILTERS = () => ({outcome:state.outcome,capital:state.capital,region:state.region});
 
 function f(v,d=2){ return v==null || Number.isNaN(+v) ? '—' : new Intl.NumberFormat('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(+v); }
 function fp(v){ if(v==null || Number.isNaN(+v)) return '—'; if(+v < .001) return '< 0,001'; return new Intl.NumberFormat('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}).format(+v); }
