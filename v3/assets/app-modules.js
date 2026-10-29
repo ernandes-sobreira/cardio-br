@@ -154,8 +154,7 @@ function setupEnvControls(){
     if(D.outcomes[state.envOutcome]){state.outcome=state.envOutcome;$('#globalOutcome').value=state.outcome;}
     updateContext();
     renderEnvironment();
-    const meta=P.meta||{};
-    $('#envRunStatus').innerHTML=`Análise recalculada: <b>${P.exposures[state.envExposure]}</b> × <b>${P.outcomes[state.envOutcome]?.label||state.envOutcome}</b> · ${meta.n_capitals||27} capitais · ${meta.period||'2008–2024'}.`;
+    // O status é atualizado em renderEnvironment com o recorte efetivamente usado.
   });
 }
 
