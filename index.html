@@ -6,24 +6,24 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta name="theme-color" content="#07111f">
+  <meta name="theme-color" content="#f5f8fa">
   <meta name="description" content="CardioClima BR — tendências da mortalidade hospitalar cardiovascular e sua relação exploratória com exposições ambientais nas capitais brasileiras.">
   <title>CardioClima BR | Mortalidade cardiovascular e ambiente</title>
-  <link rel="stylesheet" href="v3/assets/style.css?v=17">
+  <link rel="stylesheet" href="v3/assets/style.css?v=18">
   <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script defer src="v3/assets/data-gz-part-01.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-02.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-03.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-04.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-05.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-06.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-07.js?v=17"></script>
-  <script defer src="v3/assets/data-gz-part-08.js?v=17"></script>
-  <script defer src="v3/assets/data-loader.js?v=17"></script>
-  <script defer src="v3/assets/pm25-capitais-data.js?v=17"></script>
-  <script defer src="v3/assets/scope-trends-data.js?v=17"></script>
-  <script defer src="v3/assets/app-core.js?v=17"></script>
-  <script defer src="v3/assets/app-modules.js?v=17"></script>
+  <script defer src="v3/assets/data-gz-part-01.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-02.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-03.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-04.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-05.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-06.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-07.js?v=18"></script>
+  <script defer src="v3/assets/data-gz-part-08.js?v=18"></script>
+  <script defer src="v3/assets/data-loader.js?v=18"></script>
+  <script defer src="v3/assets/pm25-capitais-data.js?v=18"></script>
+  <script defer src="v3/assets/scope-trends-data.js?v=18"></script>
+  <script defer src="v3/assets/app-core.js?v=18"></script>
+  <script defer src="v3/assets/app-modules.js?v=18"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -48,7 +48,7 @@
 
       <div class="sidebar-foot">
         <span class="status-dot"></span>
-        <div><b>Base carregada</b><small>27 capitais · 2008–2025</small><small>Ernandes Sobreira · Letícia Zen</small><small>CardioClima BR · v17</small></div>
+        <div><b>Base carregada</b><small>27 capitais · 2008–2025</small><small>Ernandes Sobreira · Letícia Zen</small><small>CardioClima BR · v18 (revisão)</small></div>
       </div>
     </aside>
 
@@ -60,12 +60,12 @@
           <h1 id="pageTitle">Panorama nacional</h1>
         </div>
         <div class="top-actions">
-          <a class="ghost-link" href="#" data-download-health>Baixar CSV</a>
+          <a class="ghost-link" href="#" data-download-health="scope">Baixar CSV do filtro</a>
           <a class="primary-link" href="#methods" data-jump="methods">Método</a>
         </div>
       </header>
 
-      <section class="global-filterbar">
+      <section class="global-filterbar" aria-label="Filtros globais da plataforma">
         <label><span>Indicador</span><select id="globalOutcome"></select></label>
         <label><span>Capital</span><select id="globalCapital"></select></label>
         <label><span>Região</span><select id="globalRegion"></select></label>
@@ -89,10 +89,10 @@
           </div>
 
           <div class="kpi-grid">
-            <article class="kpi-card"><span>Pico nacional</span><strong id="kpiPeak">—</strong><small id="kpiPeakSub">—</small></article>
+            <article class="kpi-card"><span>Pico do recorte</span><strong id="kpiPeak">—</strong><small id="kpiPeakSub">—</small></article>
             <article class="kpi-card"><span>Último ano</span><strong id="kpiLatest">—</strong><small id="kpiLatestSub">—</small></article>
-            <article class="kpi-card"><span>Pós-2020</span><strong id="kpiPostSlope">—</strong><small id="kpiPostP">—</small></article>
-            <article class="kpi-card"><span>Tendências robustas</span><strong id="kpiRobust">—</strong><small>controle FDR entre capitais</small></article>
+            <article class="kpi-card"><span>Pós-2020 · modelo</span><strong id="kpiPostSlope">—</strong><small id="kpiPostP">—</small></article>
+            <article class="kpi-card"><span>Tendências robustas</span><strong id="kpiRobust">—</strong><small>FDR nas capitais selecionadas</small></article>
           </div>
 
           <div class="dashboard-grid two-thirds">
@@ -107,7 +107,7 @@
           </div>
 
           <div class="dashboard-grid equal">
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">2025</span><h3>Ranking das capitais</h3></div></div><div class="plot" id="overviewRanking"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker" id="overviewRankYear">2025</span><h3 id="overviewRankTitle">Ranking das capitais</h3></div></div><div class="plot" id="overviewRanking"></div></article>
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">VULNERABILIDADE ETÁRIA</span><h3>Gradiente de idade</h3></div></div><div class="plot" id="overviewAge"></div></article>
           </div>
         </section>
@@ -135,33 +135,33 @@
         </section>
 
         <section class="page" id="page-profiles">
-          <div class="section-intro"><div><span class="section-kicker">QUEM CONCENTRA AS MAIORES TAXAS?</span><h2>Perfis demográficos e regionais</h2><p>Os painéis abaixo tratam sexo, idade e região como dimensões descritivas da mortalidade hospitalar. Raça/cor fica separada pela maior incompletude em alguns grupos.</p></div></div>
+          <div class="section-intro"><div><span class="section-kicker">QUEM CONCENTRA AS MAIORES TAXAS?</span><h2>Perfis demográficos e regionais</h2><p>Os gráficos de sexo, idade e raça/cor comparam grupos definidos e, portanto, não mudam com o indicador do topo; capital e região filtram esses painéis. A trajetória regional acompanha o indicador selecionado. A cobertura de raça/cor é calculada no recorte.</p></div></div>
           <div class="dashboard-grid equal">
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">IDADE</span><h3>Curvas etárias: 2008 × 2020 × 2025</h3></div></div><div class="plot tall" id="ageProfile"></div></article>
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">SEXO</span><h3>Masculino × feminino</h3></div></div><div class="plot tall" id="sexTrend"></div></article>
           </div>
-          <article class="panel"><div class="panel-head"><div><span class="section-kicker">REGIÕES</span><h3>Trajetórias regionais</h3></div><div class="panel-note">média simples das capitais da região</div></div><div class="plot tall" id="regionTrend"></div></article>
+          <article class="panel"><div class="panel-head"><div><span class="section-kicker">REGIÕES</span><h3 id="regionTrendTitle">Trajetórias regionais</h3></div><div class="panel-note">média simples das capitais da região</div></div><div class="plot tall" id="regionTrend"></div></article>
           <article class="panel"><div class="panel-head"><div><span class="section-kicker">RAÇA/COR</span><h3>Cobertura antes da interpretação</h3></div></div><div class="race-warning" id="raceWarning"></div><div class="plot" id="raceCoverage"></div></article>
         </section>
 
         <section class="page" id="page-environment">
-          <div class="section-intro"><div><span class="section-kicker">MÓDULO AMBIENTAL — COBERTURA NACIONAL</span><h2>PM2,5 × saúde nas 27 capitais brasileiras</h2><p>Base diária CAMS/EAC4 para todas as capitais, agregada de 2008 a 2024. Selecione a métrica de exposição e qualquer grupo de saúde disponível para recalcular a análise.</p></div><div class="method-chip amber">ecológico · não causal</div></div>
+          <div class="section-intro"><div><span class="section-kicker">MÓDULO AMBIENTAL — COBERTURA NACIONAL</span><h2>PM2,5 × saúde nas 27 capitais brasileiras</h2><p>Base diária CAMS/EAC4, agregada de 2008 a 2024. Os gráficos descritivos acompanham a capital e a região selecionadas no topo. Os modelos de efeitos fixos disponíveis são nacionais; filtros locais não geram novas estimativas inferenciais.</p></div><div class="method-chip amber">ecológico · não causal</div></div>
 
           <div class="env-controls">
             <label><span>Exposição PM2,5</span><select id="envExposure"></select></label>
             <label><span>Grupo / indicador de saúde</span><select id="envOutcome"></select></label>
-            <button type="button" class="env-run" id="envRun">CALCULAR ANÁLISE</button>
-            <div class="env-run-status" id="envRunStatus">27 capitais · 2008–2024 · escolha as opções e clique em calcular.</div>
+            <button type="button" class="env-run" id="envRun">ATUALIZAR ANÁLISE</button>
+            <div class="env-run-status" id="envRunStatus">Selecione a exposição e o indicador de saúde para atualizar os gráficos.</div>
           </div>
 
           <div class="dashboard-grid two-thirds">
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">27 CAPITAIS · 2008–2024</span><h3 id="envScatterTitle">PM2,5 × saúde</h3></div><span class="confidence-badge" id="envSig">—</span></div><div class="plot tall" id="envScatter"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker" id="envScatterScope">27 CAPITAIS · 2008–2024</span><h3 id="envScatterTitle">PM2,5 × saúde</h3></div><span class="confidence-badge" id="envSig">—</span></div><div class="plot tall" id="envScatter"></div></article>
             <article class="panel metric-stack" id="envMetrics"></article>
           </div>
 
           <div class="dashboard-grid equal">
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">TRAJETÓRIA AMBIENTAL</span><h3>PM2,5 por região</h3></div><div class="panel-note">média das capitais de cada região</div></div><div class="plot" id="envRegionTrend"></div></article>
-            <article class="panel"><div class="panel-head"><div><span class="section-kicker">27 CAPITAIS · 2024</span><h3 id="envRankingTitle">Ranking da exposição</h3></div></div><div class="plot" id="envCapitalRanking"></div></article>
+            <article class="panel"><div class="panel-head"><div><span class="section-kicker" id="envRankScope">27 CAPITAIS · 2024</span><h3 id="envRankingTitle">Ranking da exposição</h3></div></div><div class="plot" id="envCapitalRanking"></div></article>
           </div>
 
           <article class="panel" id="envPanelSummary">
@@ -173,6 +173,7 @@
         </section>
 
         <section class="page" id="page-models">
+          <div class="scope-note" id="modelScopeNotice" role="status">Este painel apresenta modelos nacionais pré-calculados.</div>
           <div class="section-intro"><div><span class="section-kicker">MODELOS PARA EXPLICAR A CURVA</span><h2>Segmentação temporal e sensibilidade</h2><p>O modelo segmentado usa efeitos fixos de capital e erros-padrão agrupados por capital. O objetivo é distinguir tendência antes de 2020, mudança de nível em 2020 e inclinação depois de 2020.</p></div></div>
           <article class="panel"><div class="panel-head"><div><span class="section-kicker">MODELO SEGMENTADO</span><h3>Inclinação pré e pós-2020</h3></div></div><div class="plot xl" id="segmentedForest"></div></article>
           <div class="dashboard-grid equal">
@@ -182,7 +183,7 @@
         </section>
 
         <section class="page" id="page-quality">
-          <div class="section-intro"><div><span class="section-kicker">NÃO ESCONDER PROBLEMAS DO DADO</span><h2>Cobertura, anomalias e limites</h2><p>Uma plataforma científica confiável mostra onde os dados são fortes e onde exigem auditoria antes da interpretação.</p></div></div>
+          <div class="section-intro"><div><span class="section-kicker">NÃO ESCONDER PROBLEMAS DO DADO</span><h2>Cobertura, anomalias e limites</h2><p>A cobertura compara todos os indicadores no recorte geográfico. As anomalias e a comparação entre capitais utilizam o indicador do topo; os dois seletores da comparação são independentes para permitir confrontar localidades diferentes.</p></div></div>
           <div class="dashboard-grid equal">
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">COMPLETUDE DO ESCOPO</span><h3 id="coverageTitle">Cobertura por indicador</h3></div><div class="panel-note" id="coverageNote">—</div></div><div class="plot tall" id="coveragePlot"></div></article>
             <article class="panel"><div class="panel-head"><div><span class="section-kicker">SINAL DE ALERTA · ESCOPO SELECIONADO</span><h3 id="qualityAlertTitle">—</h3></div></div><div class="quality-callout"><strong id="qualityAlertValues">—</strong><span id="qualityAlertDelta">—</span><p id="qualityAlertText">—</p></div></article>
@@ -208,7 +209,8 @@
           <article class="panel source-panel">
             <div class="panel-head"><div><span class="section-kicker">SOBRE A PLATAFORMA</span><h3>CardioClima BR</h3></div></div>
             <div class="source-list">
-              <div><b>Desenvolvimento</b><span>Plataforma desenvolvida por <strong>Ernandes Sobreira</strong> e <strong>Letícia Zen</strong>.</span></div>
+              <div><b>Desenvolvimento</b><span>Plataforma desenvolvida por <strong>Ernandes Sobreira Oliveira Junior</strong> e <strong>Letícia Carvalho Zen</strong>.</span></div>
+              <div><b>Registro INPI</b><span>O software de origem <strong>Cardio BR</strong> possui Registro de Programa de Computador <strong>BR512026007006-6</strong>, expedido em 01/09/2026. Titular: <strong>Universidade do Estado de Mato Grosso (UNEMAT)</strong>. Esta plataforma <strong>CardioClima BR v18</strong> é uma evolução posterior; o registro informado não constitui um novo certificado específico para esta atualização.</span></div>
               <div><b>Objetivo</b><span>Organizar, visualizar e explorar as tendências da mortalidade hospitalar por doenças cardiovasculares nas capitais brasileiras e investigar, de forma ecológica e exploratória, possíveis relações com exposições ambientais. A plataforma busca facilitar a comparação entre capitais, regiões, grupos demográficos e períodos, além de tornar visíveis a qualidade, a cobertura e as limitações dos dados.</span></div>
               <div><b>Escopo</b><span>27 capitais brasileiras, com série de saúde de 2008 a 2025 e módulos ambientais específicos conforme a disponibilidade das bases utilizadas.</span></div>
             </div>
@@ -216,7 +218,7 @@
 
           <div class="method-grid">
             <article class="method-card"><span>01</span><h3>Desfecho</h3><p>Taxa de mortalidade hospitalar por doenças do aparelho circulatório — CID-10, Capítulo IX. É um indicador condicionado às internações hospitalares e não uma taxa populacional de mortalidade.</p></article>
-            <article class="method-card"><span>02</span><h3>Tendência</h3><p>Capital individual: OLS com erro HAC(1), APC log-linear e Theil–Sen; FDR de Benjamini–Hochberg entre capitais. Brasil/região: a série anual é a média simples das capitais do escopo e a tendência é recalculada sobre essa série agregada.</p></article>
+            <article class="method-card"><span>02</span><h3>Tendência</h3><p>Capital individual: OLS com erro HAC(1), APC log-linear e Theil–Sen; FDR de Benjamini–Hochberg entre capitais. Brasil/região: cada ponto anual é uma média simples, não ponderada, das capitais. Essa média não é a taxa nacional de mortalidade hospitalar de todos os hospitais brasileiros.</p></article>
             <article class="method-card"><span>03</span><h3>Segmentação</h3><p>Efeitos fixos de capital + termo temporal + nível em 2020 + mudança de inclinação pós-2020; erros-padrão agrupados por capital.</p></article>
             <article class="method-card"><span>04</span><h3>Ambiente</h3><p>PM2,5 diário municipal CAMS/EAC4, 2008–2024 no recorte da plataforma. Associação bruta por Pearson/Spearman e painel longitudinal com efeitos fixos de capital e ano, incluindo análise sem 2020–2021 e primeira diferença.</p></article>
           </div>
@@ -234,7 +236,8 @@
             </div>
           </article>
           <div class="download-grid">
-            <a href="#" data-download-health><b>Mortalidade 2008–2025</b><span>CSV · 486 registros</span></a>
+            <a href="#" data-download-health="scope"><b>Mortalidade · filtro selecionado</b><span>CSV · indicador, capital e região atuais</span></a>
+            <a href="#" data-download-health="all"><b>Mortalidade 2008–2025 · base completa</b><span>CSV · 486 registros</span></a>
             <a href="v3/data/pm25_capitais_anual_2008_2024.csv" download><b>PM2,5 anual — 27 capitais</b><span>CSV · 459 capital-anos</span></a>
             <a href="v3/data/pm25_capitais_diario_2008_2024.csv" download><b>PM2,5 diário — 27 capitais</b><span>CSV · 167.670 registros</span></a>
           </div>
@@ -252,10 +255,14 @@
     try{
       var d=window.CARDIOCLIMA_READY?await window.CARDIOCLIMA_READY:window.CARDIOCLIMA_DATA;
       var rows=d&&d.mortality; if(!rows||!rows.length) throw new Error('Base ainda não carregada');
-      var headers=Object.keys(rows[0]);
+       var mode=ev.target.closest('[data-download-health]')?.dataset.downloadHealth||'all';
+       var scope=window.CARDIOCLIMA_GET_FILTERS?window.CARDIOCLIMA_GET_FILTERS():{outcome:'Taxa mortalidade geral',capital:'ALL',region:'ALL'};
+       if(mode==='scope') rows=rows.filter(r=>(scope.capital==='ALL'||r.Capital===scope.capital)&&(scope.region==='ALL'||r['Região']===scope.region));
+       if(!rows.length) throw new Error('Sem dados no recorte selecionado');
+      var headers=mode==='all'?Object.keys(rows[0]):['Capital','UF','Região','Ano',scope.outcome].filter((v,i,a)=>a.indexOf(v)===i);
       var csv='\ufeff'+headers.map(csvEscape).join(',')+'\n'+rows.map(r=>headers.map(h=>csvEscape(r[h])).join(',')).join('\n');
       var url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-      var a=document.createElement('a'); a.href=url; a.download='mortalidade_capitais_2008_2025.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+      var a=document.createElement('a'); a.href=url; a.download=mode==='all'?'mortalidade_capitais_2008_2025_completo.csv':'cardioclima_filtro_2008_2025.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
     }catch(err){ alert('Não foi possível gerar o CSV agora: '+err.message); }
   }
   document.addEventListener('click',function(ev){ var a=ev.target.closest('[data-download-health]'); if(a) downloadHealth(ev); });
