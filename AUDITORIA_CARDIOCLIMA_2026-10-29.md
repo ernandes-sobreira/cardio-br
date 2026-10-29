@@ -2,7 +2,7 @@
 **Data:** 29/10/2026  
 **Versão examinada:** v17, ramo `main`  
 **Versão de correção proposta:** v18, ramo `audit/2026-10-29-filtros-visual`  
-**Status:** correções propostas; ainda não publicadas na versão principal.
+**Status:** correções v18 publicadas na branch principal em 29/10/2026, por meio do PR #1 (commit `1d7cdc527a243898edf0b8a9306675dfe6fc533b`).
 
 ## 1. Achados confirmados no código original
 
@@ -38,7 +38,7 @@
 5. **Teste lógico com dados simulados:** para duas capitais, com uma classe "sem tendência robusta" e outra "queda robusta", o contador passou a mostrar `1/2` nacional e `1/1` para o recorte regional da capital robusta. O KPI segmentado local mostrou indisponível. O módulo ambiental passou a distinguir modelo nacional de visualização local descritiva.
 6. **Dados PM2,5:** verificados os 5 campos de exposição, 21 desfechos e a presença de estatísticas pré-calculadas para todas as combinações.
 
-**Limite de teste:** a página pública está em `main`; não houve teste ponta a ponta com toques reais no navegador móvel, nem recálculo completo independente das estatísticas da base de mortalidade. É necessário validar visualmente antes de mesclar a revisão.
+**Limite de teste:** a página pública está em `main`; não houve teste ponta a ponta com toques reais no navegador móvel, nem recálculo completo independente das estatísticas da base de mortalidade. Após a publicação, é recomendável realizar validação visual e de interação em dispositivo móvel real.
 
 ## 4. Pendências metodológicas recomendadas
 
@@ -49,7 +49,7 @@
 5. Revisar, após validação, a dependência de Plotly por CDN externo: quando não carrega, a função `plot` original não explica o motivo da ausência dos gráficos.
 6. Executar bateria final de navegação em Android, iOS e desktop; testar todas as combinações de indicador, capital, região, exportação e ausência de dados.
 
-## 5. Checklist de aceitação para publicação
+## 5. Checklist de verificação no aplicativo publicado
 
 - [ ] Alterar Indicador, Capital e Região e verificar títulos, gráficos, KPIs e exportação no Panorama.
 - [ ] Confirmar que "tendências robustas" corresponde à contagem **exclusiva** das classificações robustas na base real.
