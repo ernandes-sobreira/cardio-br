@@ -121,7 +121,7 @@ function renderOverview(){
   $('#kpiPeak').textContent=`${f(peak.mean)}%`; $('#kpiPeakSub').textContent=`${peak.year} · ${scopeName()}${national?' (média simples)':''}`;
   $('#kpiLatest').textContent=`${f(last.mean)}%`; $('#kpiLatestSub').textContent=`${last.year} · ${peak.mean? pct((last.mean/peak.mean-1)*100,1):'—'} vs pico`;
   $('#kpiPostSlope').textContent=seg?`${pp(seg.post_slope,2)}/ano`:'—'; $('#kpiPostP').textContent=seg?`p ${fp(seg.post_p)} · SE cluster`:'estimativa segmentada apenas no Brasil';
-  const ts=Object.entries(D.analysis[state.outcome].capital_trends||{}).filter(([cap,t])=>t&&(state.capital==='ALL'||cap===state.capital)&&(state.region==='ALL'||D.capitals[cap]?.region===state.region)).map(([,t])=>t); const robust=ts.filter(t=>t.classificacao?.includes('robusta')).length;
+  const ts=Object.entries(D.analysis[state.outcome].capital_trends||{}).filter(([cap,t])=>t&&(state.capital==='ALL'||cap===state.capital)&&(state.region==='ALL'||D.capitals[cap]?.region===state.region)).map(([,t])=>t); const robust=ts.filter(t=>t.classificacao==='queda robusta'||t.classificacao==='alta robusta').length;
   $('#kpiRobust').textContent=`${robust}/${ts.length}`;
 
   const x=valid.map(d=>d.year), y=valid.map(d=>d.mean); const lo=valid.map(d=>d.ci_low), hi=valid.map(d=>d.ci_high);
