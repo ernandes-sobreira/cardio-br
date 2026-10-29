@@ -97,3 +97,12 @@ button,select,input,a{font:inherit} a{color:inherit}.app-shell{min-height:100vh}
   .quality-compare-controls{grid-template-columns:minmax(0,1fr)}
   .env-controls{grid-template-columns:minmax(0,1fr)}
 }
+
+/* v18: exportação visível em dispositivos móveis e cards de dados. */
+@media(min-width:1181px){.download-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:820px),(hover:none) and (pointer:coarse) and (max-width:1100px){
+  .topbar .top-actions{display:flex;gap:0;flex-shrink:0}
+  .topbar .top-actions .ghost-link{display:flex;align-items:center;font-size:11px;padding:8px 10px;white-space:nowrap;border-color:#bedcd5;color:#096d65;background:#f2faf8}
+  .topbar .top-actions .primary-link{display:none}
+}
+@media(max-width:420px){.top-title h1{font-size:16px}.topbar .top-actions .ghost-link{font-size:10px;padding:7px 8px}}
