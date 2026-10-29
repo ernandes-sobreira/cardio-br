@@ -62,6 +62,7 @@ function renderSlopeForest(){
     .filter(([capital,t])=>t&&t.n>=8&&(state.region==='ALL'||D.capitals[capital]?.region===state.region)&&(state.capital==='ALL'||capital===state.capital))
     .map(([capital,t])=>({capital,...t}))
     .sort((a,b)=>a.slope-b.slope);
+  $('#slopeForest').style.height=Math.max(240,Math.min(760,items.length*24+95))+'px';
   plot('slopeForest',[{
     x:items.map(d=>d.slope),y:items.map(d=>d.capital),mode:'markers',type:'scatter',
     marker:{size:8,color:items.map(d=>d.q_fdr<.05?(d.slope<0?colors.green:colors.red):'#9aa9b8')},
@@ -69,7 +70,7 @@ function renderSlopeForest(){
     customdata:items.map(d=>[d.apc,d.p,d.q_fdr,d.classificacao]),
     hovertemplate:'<b>%{y}</b><br>inclinação %{x:.3f} p.p./ano<br>APC %{customdata[0]:.2f}%<br>p %{customdata[1]:.4f}<br>q %{customdata[2]:.4f}<br>%{customdata[3]}<extra></extra>'
   }],{
-    height:Math.max(420,items.length*24),margin:{l:105,r:30,t:10,b:45},
+    height:Math.max(240,Math.min(760,items.length*24+95)),margin:{l:105,r:30,t:10,b:45},
     xaxis:{title:'Mudança estimada por ano (p.p.)',gridcolor:'#edf2f6',zeroline:true,zerolinecolor:'#31465a',zerolinewidth:1},
     yaxis:{gridcolor:'rgba(0,0,0,0)'}
   });
@@ -276,13 +277,14 @@ function renderEnvironment(){
   const rank=annualScope.filter(r=>r.Ano===latest&&r[xk]!=null)
     .sort((a,b)=>a[xk]-b[xk]);
   $('#envRankingTitle').textContent=state.capital==='ALL'?`Ranking da exposição · ${latest} · ${scopeName()}`:`Exposição em ${state.capital} · ${latest}`;
+  $('#envCapitalRanking').style.height=Math.max(235,Math.min(650,rank.length*20+95))+'px';
   plot('envCapitalRanking',[{
     x:rank.map(r=>r[xk]),y:rank.map(r=>r.Capital),type:'bar',orientation:'h',
     marker:{color:rank.map(r=>regionColors[r.Região]||colors.teal)},
     text:rank.map(r=>f(r[xk],1)),textposition:'outside',
     hovertemplate:'<b>%{y}</b><br>%{x:.2f}<extra></extra>'
   }],{
-    height:Math.max(520,rank.length*19),margin:{l:105,r:45,t:10,b:45},
+    height:Math.max(235,Math.min(650,rank.length*20+95)),margin:{l:105,r:45,t:10,b:45},
     xaxis:{title:exposureLabel,gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'},showlegend:false
   });
 
