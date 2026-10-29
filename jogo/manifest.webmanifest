@@ -1,0 +1,19 @@
+{
+  "name": "Pulso da Cidade — CardioClima Kids",
+  "short_name": "Pulso da Cidade",
+  "description": "Jogo de coração, calor, fumaça e dados ambientais.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f9fa",
+  "theme_color": "#0b8985",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
