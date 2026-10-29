@@ -139,7 +139,7 @@ function setupEnvControls(){
     const og=document.createElement('optgroup'); og.label=g;
     entries.forEach(([v,m])=>{
       const o=document.createElement('option');
-      o.value=v; o.textContent=m.label||v; og.appendChild(o);
+      o.value=v; o.textContent=outcomeLabel(v); og.appendChild(o);
     });
     oy.appendChild(og);
   });
@@ -185,7 +185,7 @@ function renderEnvironment(){
 
   const xk=state.envExposure, yk=state.envOutcome;
   const exposureLabel=P.exposures[xk]||xk;
-  const outcomeMeta=P.outcomes[yk]||{label:yk,group:'Outro'};
+  const outcomeMeta={...(P.outcomes[yk]||{group:'Outro'}),label:outcomeLabel(yk)};
   const rows=envMergedRows(xk,yk);
   const national=state.capital==='ALL'&&state.region==='ALL';
   const st=national?P.stats?.[xk]?.outcomes?.[yk]:null;
@@ -409,7 +409,7 @@ function qualityCoverage(){
   const total=rows.length;
   return Object.entries(D.outcomes).map(([key,meta])=>{
     const n=rows.filter(r=>safe(r[key])!=null).length;
-    return {key,label:meta.label,group:meta.group,n,total,coverage_pct:total?100*n/total:0};
+    return {key,label:outcomeLabel(key),group:meta.group,n,total,coverage_pct:total?100*n/total:0};
   }).sort((a,b)=>a.coverage_pct-b.coverage_pct);
 }
 
