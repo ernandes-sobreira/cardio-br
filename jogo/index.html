@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f9fa">
+<meta name="description" content="Pulso da Cidade — um jogo interativo de coração, calor, fumaça e ciência de dados. Um projeto educacional ligado ao CardioClima BR.">
+<title>Pulso da Cidade | Um jogo CardioClima</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<style>
+:root{--bg:#f5f9fa;--ink:#173247;--muted:#667e8d;--teal:#0b8985;--teal-dark:#046b6a;--line:#e1ecee;--panel:#fff;--blue:#3679bc;--red:#e76567;--orange:#eb9b46;--shadow:0 14px 45px rgba(32,74,86,.055);--radius:22px;--header:72px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}button,select,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}a{color:var(--teal-dark)}:focus-visible{outline:3px solid #eab668;outline-offset:3px}[hidden]{display:none!important}::selection{background:#bbebe0}
+.page-shell{max-width:1510px;margin:auto;padding:0 25px 46px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:var(--header);padding:12px 0 13px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;min-width:230px}.brand-mark{width:45px;height:45px;background:#e2f6f3;border:1px solid #caebe7;border-radius:15px;display:grid;place-items:center}.brand-mark svg{width:29px;height:29px}.brand-name{font-weight:850;font-size:19px;letter-spacing:-.8px;line-height:1.1}.brand-sub{color:var(--muted);font-size:11px;margin-top:3px;letter-spacing:.015em}.app-tabs{display:flex;align-items:center;gap:5px;background:#eaf1f2;border-radius:14px;padding:5px}.app-tab{border:0;background:transparent;color:#587080;border-radius:11px;padding:10px 15px;font-weight:750;white-space:nowrap}.app-tab.active{background:#fff;color:#0a716f;box-shadow:0 3px 11px rgba(14,51,61,.09)}.header-tools{display:flex;gap:8px}.mini-action{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;font-weight:700;color:#34596d;white-space:nowrap}.mini-action:hover{border-color:#afdbd6}.mini-action.active{background:#e8f7f3;border-color:#addbd3;color:#096e67}
+.hero-intro{display:flex;align-items:end;justify-content:space-between;gap:30px;margin:24px 0 16px}.eyebrow{display:block;color:var(--teal-dark);font-weight:850;text-transform:uppercase;letter-spacing:.14em;font-size:10px}.hero-intro h1{font-size:clamp(24px,2.7vw,37px);letter-spacing:-1.5px;line-height:1.12;margin:6px 0 8px}.hero-intro p{color:var(--muted);font-size:13px;max-width:800px;margin:0}.sim-note{display:flex;gap:8px;align-items:center;background:#fff7eb;border:1px solid #f3e0bc;color:#8b6234;border-radius:13px;padding:10px 13px;font-size:11.5px;max-width:330px}.sim-note .dot{width:9px;height:9px;flex:0 0 auto;border-radius:50%;background:#e6a95a}
+.missions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:0 0 17px}.mission-tab{display:flex;text-align:left;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px 15px;min-width:0;min-height:72px;position:relative;overflow:hidden;transition:.18s}.mission-tab:hover{border-color:#9ccdc5;transform:translateY(-1px)}.mission-tab.active{background:#eef9f5;border-color:#93d4ca;box-shadow:inset 3px 0 0 var(--teal)}.mission-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:25px;background:#f5f6f7;flex-shrink:0}.mission-tab.active .mission-icon{background:#fff}.mission-copy{min-width:0}.mission-copy b{display:block;font-size:13px;line-height:1.25}.mission-copy small{display:block;font-size:11px;color:var(--muted);margin-top:4px;white-space:normal}.mission-medal{position:absolute;right:11px;top:8px;color:#b5812e;font-size:17px}
+.goalbar{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #cce7e6;background:#f1faf9;border-radius:15px;padding:12px 17px;margin-bottom:17px}.goalbar strong{display:block;font-size:14px}.goalbar small{display:block;color:#52727b;margin-top:3px}.goalbar .pill{background:white;border:1px solid #d4ece8;color:#23675c;font-size:11px;font-weight:750;padding:6px 11px;border-radius:99px;white-space:nowrap}.game-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.9fr);gap:17px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0;overflow:hidden}.panel-head{display:flex;align-items:start;justify-content:space-between;gap:10px;padding:18px 21px 14px}.panel-head h2{margin:4px 0 0;font-size:19px;letter-spacing:-.65px}.panel-head .support{color:var(--muted);font-size:11px;margin-top:3px}.panel-badges{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}.tag{border:1px solid #e5eef0;background:#f7fafb;border-radius:100px;padding:5px 9px;color:#51707e;font-size:10.5px;font-weight:750;white-space:nowrap}.tag.heat{color:#a45c28;background:#fff5e8;border-color:#ffe0bc}.tag.smoke{color:#6e6886;background:#f3f1f9;border-color:#e3deed}.panel-title-meta{max-width:330px}
+/* Outside world */
+.world-stage{height:360px;position:relative;isolation:isolate;overflow:hidden;margin:0 16px;border-radius:17px;background:linear-gradient(#ccebf0 0%,#e9f5f2 66%,#a6c6a0 67%,#b7d2b0 83%,#a9bba8 84%);touch-action:pan-y;user-select:none;cursor:crosshair}.world-stage::before{content:"";position:absolute;inset:0;background:linear-gradient(118deg,rgba(255,234,176,.12),transparent 52%);pointer-events:none;z-index:1}.world-stage.hot{background:linear-gradient(#ffd9ae 0%,#ffedcb 66%,#c0d2a6 67%,#b9c29e 83%,#a0ae9d 84%)}.world-stage.smoky::after{content:"";pointer-events:none;position:absolute;inset:0;z-index:7;background:linear-gradient(135deg,rgba(111,113,132,.10),rgba(99,93,117,.20));mix-blend-mode:multiply;animation:smokeShift 7s ease-in-out infinite alternate}.world-stage.hot.smoky{background:linear-gradient(#e9c5a0 0%,#f8e1bc 66%,#b5c39e 67%,#aebca4 83%,#9dab95 84%)}
+@keyframes smokeShift{from{opacity:.4;transform:translateX(-12px)}to{opacity:.85;transform:translateX(12px)}}.sky-sun{position:absolute;top:7%;left:77%;width:66px;height:66px;border-radius:50%;background:#ffe093;box-shadow:0 0 0 18px rgba(255,231,170,.27),0 0 65px 33px rgba(255,224,148,.35);z-index:0;transition:.4s}.hot .sky-sun{background:#ffb960;box-shadow:0 0 0 18px #ffc88a44,0 0 85px 40px #f5a44f44}.world-cloud{position:absolute;z-index:1;color:#fff;font-size:52px;opacity:.75;filter:drop-shadow(0 4px 4px #a2c4cc55);animation:cloudDrift 10s ease-in-out infinite alternate}.cloud-a{left:13%;top:7%}.cloud-b{left:44%;top:16%;animation-delay:-5s;opacity:.5}@keyframes cloudDrift{to{transform:translateX(26px)}}.smoke-plume{position:absolute;width:170px;height:165px;top:5%;left:9%;z-index:2;opacity:0;pointer-events:none;background:radial-gradient(ellipse at 45% 50%,rgba(67,69,84,.35) 0%,rgba(72,72,84,.2) 40%,transparent 67%);filter:blur(6px);transform:rotate(12deg);animation:driftPlume 6s ease-in-out infinite alternate}.smoky .smoke-plume{opacity:1}.smoke-plume.second{left:39%;top:1%;transform:scale(.7);animation-delay:-3s}.smoke-plume.third{left:63%;top:12%;transform:scale(1.35);animation-delay:-5s}@keyframes driftPlume{to{transform:translate(30px,-18px) scale(1.18)}}
+.horizon{position:absolute;inset:auto 0 27% 0;height:28%;pointer-events:none;z-index:1;background:linear-gradient(90deg,#90b4a355 0 17%,#a1baad55 17% 36%,#a8c4b855 36% 66%,#b5c4ba55 66% 100%);clip-path:polygon(0 50%,4% 50%,4% 20%,10% 20%,10% 53%,17% 53%,17% 5%,21% 5%,21% 48%,25% 48%,25% 31%,31% 31%,31% 62%,38% 62%,38% 7%,44% 7%,44% 58%,55% 58%,55% 28%,60% 28%,60% 57%,66% 57%,66% 5%,71% 5%,71% 45%,78% 45%,78% 18%,83% 18%,83% 55%,90% 55%,90% 30%,95% 30%,95% 55%,100% 55%,100% 100%,0 100%)}.scene-road{position:absolute;left:0;right:0;bottom:0;height:18%;background:#647c88;z-index:2}.scene-road::before{content:"";position:absolute;top:17%;width:100%;height:3px;background:#dae8eb}.scene-road::after{content:"";position:absolute;top:58%;left:0;right:0;border-top:3px dashed #d2dfe07f}.scene-walkway{position:absolute;left:0;right:0;top:76%;height:10%;background:linear-gradient(#d9ded2,#c6d4c6);z-index:3;border-top:3px solid #a8b7a4}.scene-hill{position:absolute;width:45%;height:29%;left:-8%;bottom:22%;background:#82ad7d66;border-radius:60% 60% 0 0;z-index:1}.scene-hill.alt{left:72%;width:35%;height:24%;background:#89b18c44}.station{position:absolute;transform:translateX(-50%);z-index:5;border:0;background:transparent;padding:0;min-width:60px;text-align:center;color:var(--ink);user-select:none;cursor:pointer}.station:hover .station-graphic,.station:focus-visible .station-graphic{transform:translateY(-4px) scale(1.04)}.station-graphic{display:block;font-size:59px;filter:drop-shadow(0px 4px 2px #14354220);transition:transform .18s;line-height:1}.station-label{display:block;background:#fffef5eF;border:1px solid #dee8dc;border-radius:8px;font-weight:750;font-size:11px;padding:3px 7px;box-shadow:0 2px 7px #38516d1c;white-space:nowrap}.tree-station{left:21%;top:39%}.water-station{left:40%;top:54%}.water-station .station-graphic{font-size:45px}.shelter-station{left:69%;top:41%}.shelter-station .station-graphic{font-size:58px}.school-station{left:91%;top:39%}.school-station .station-graphic{font-size:60px}.station.is-near .station-label{background:#e7fff4;border-color:#7dcc9c;animation:nearPulse 1.2s ease-in-out infinite alternate}@keyframes nearPulse{to{box-shadow:0 0 0 6px #6dd4a322}}
+.traveler{position:absolute;top:58%;left:6%;width:68px;transform:translateX(-50%);height:105px;z-index:8;touch-action:none;cursor:grab;will-change:left;filter:drop-shadow(0 5px 3px #33515a33)}.traveler:active{cursor:grabbing}.traveler svg{height:100%;width:100%}.traveler.walking .traveler-leg{animation:legSwing .24s ease-in-out infinite alternate;transform-origin:center top}.traveler.walking .traveler-leg.leg2{animation-delay:-.24s}.traveler .shirt{fill:#0c8584}.traveler .pants{fill:#24546b}.traveler .skin{fill:#bf8765}@keyframes legSwing{to{transform:rotate(16deg)}}.traveler:focus-visible{outline:3px dashed #0b8985;border-radius:30px}.world-time{position:absolute;top:13px;left:14px;background:#ffffffdf;border:1px solid #ffffffaa;border-radius:12px;padding:8px 10px;z-index:7;color:#486877;font-size:11px;max-width:38%;font-weight:700}.world-time b{color:#203e51}.world-hint{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;color:#fff;z-index:9;font-size:10px;background:#24435acb;padding:6px 12px;border-radius:99px;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}.added-item{position:absolute;z-index:5;transform:translate(-50%,-50%);font-size:40px;filter:drop-shadow(0 4px 5px #314b4150)}.added-item small{display:block;text-align:center;font-size:10px;background:#ffffffeb;border-radius:6px;padding:2px;color:#35606a;font-weight:800}.drag-ghost{position:absolute;z-index:11;pointer-events:none;font-size:42px;opacity:.83;transform:translate(-50%,-50%)}
+.world-controls{padding:13px 17px 16px}.play-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{background:#fff;color:#264b5b;border:1px solid #dbe8ec;border-radius:12px;padding:10px 14px;font-weight:760;font-size:12px;min-height:41px;box-shadow:0 2px 6px #13364b05}.btn:hover:not(:disabled){border-color:#8fc9c1;background:#f8fdfa}.btn.primary{background:#0c8b84;border-color:#0c8b84;color:#fff}.btn.primary:hover{background:#086f69}.btn.amber{background:#fff4e3;color:#915925;border-color:#f4d8af}.btn.selected{border-color:#099b90;background:#e8f9f4;color:#076d68}.btn.icon-only{min-width:42px;padding:10px}.control-hint{color:var(--muted);font-size:11px;margin:10px 1px 0}.tool-shelf{margin-top:13px;padding:11px;border-radius:14px;background:#f5f9f9;border:1px dashed #d0e6e4;display:flex;gap:9px;align-items:center;flex-wrap:wrap}.tool-shelf b{font-size:11px;color:#607c8c;margin-right:5px}.tool{padding:7px 9px;background:#fff;border:1px solid #d9e7e4;border-radius:10px;color:#2b5761;font-weight:700;font-size:11px;touch-action:none;cursor:grab}.tool.active{border-color:#0b8a80;background:#ddf7f0;box-shadow:0 0 0 2px #acdcd340}.tool small{color:#76949c;display:inline}.tool-caption{font-size:10px;color:#64828c;flex-basis:100%;margin-top:0}
+/* Human circulation */
+.heart-visual{padding:0 13px 4px;position:relative}.heart-svg{width:100%;height:auto;display:block;overflow:visible;max-height:360px;touch-action:none}.heart-muscle{filter:drop-shadow(0 6px 12px #b55f6e20);transform-origin:317px 244px;animation:beating var(--heart-period,.81s) cubic-bezier(.2,.45,.5,1) infinite}.heart-muscle .muscle-outer{fill:#efb9b9;stroke:#c97684;stroke-width:6}.heart-muscle .muscle-inner{fill:#f9e3e3}.heart-blue{fill:#a9c7ed;stroke:#6389c3;stroke-width:3}.heart-red{fill:#f6a5a4;stroke:#d56e79;stroke-width:3}.septum{fill:none;stroke:#b9748f;stroke-width:12;stroke-linecap:round;opacity:.7}@keyframes beating{0%,100%{transform:scale(1)}23%{transform:scale(1.027)}40%{transform:scale(.995)}62%{transform:scale(1.012)}}.blood-track{fill:none;stroke-width:13;stroke-linecap:round;stroke-linejoin:round;opacity:.38}.blood-track.venous{stroke:#4595c8}.blood-track.arterial{stroke:#df7275}.blood-track-over{fill:none;stroke-width:3;stroke-dasharray:6 9;stroke-linecap:round;opacity:.55;animation:pathMarch 3s linear infinite}.blood-track-over.venous{stroke:#2072b1}.blood-track-over.arterial{stroke:#d24d5c}@keyframes pathMarch{to{stroke-dashoffset:-45}}.circulatory-note{font-size:11px;fill:#658196;font-weight:750;letter-spacing:.03em}.chamber-name{fill:#344b69;font-weight:750;font-size:10.5px;pointer-events:none}.chamber-name.red{fill:#8b4354}.blood-node{cursor:pointer;touch-action:none;outline:none}.blood-node circle{fill:#ffffff00;stroke:transparent;stroke-width:1}.blood-node.is-next circle{fill:#fff8ed;stroke:#e9a842;stroke-width:2;stroke-dasharray:4 4;animation:targetGlow 1.3s ease-in-out infinite alternate}.blood-node.is-next text{fill:#9d6630}.blood-node.is-visited circle{fill:#d9f0ee;stroke:#5baea3;stroke-width:1.5;opacity:.65}.blood-node text{font-weight:720;fill:#688093;font-size:9px;pointer-events:none}.blood-node:focus-visible circle{stroke:#0b8985;stroke-width:4}.blood-node.is-next:hover circle{fill:#fff4de}@keyframes targetGlow{to{stroke-width:5;fill:#ffefcf}}#rbcAvatar{cursor:grab;touch-action:none;filter:drop-shadow(0 3px 2px #763a4370)}#rbcAvatar:active{cursor:grabbing}.rbc-disc{stroke:#fff;stroke-width:3;fill:#498fcb}.rbc-disc.oxygenated{fill:#ed6672}.rbc-core{fill:#fff6;opacity:.6}.rbc-mini{fill:#fff;stroke:#ffffffb0;stroke-width:1}.svg-label{font-size:12px;fill:#5b788a;font-weight:700}.svg-label.bold{font-weight:900;fill:#203e52}.lung-organ{fill:#d9e9ec;stroke:#88bcc3;stroke-width:3}.lung-bronchi{stroke:#6fb5c6;fill:none;stroke-width:7;stroke-linecap:round}.air-spark{fill:#b3dfea;opacity:.8;animation:breathe 2.1s ease-in-out infinite alternate}@keyframes breathe{to{transform:translateY(-7px);opacity:.45}}.valve-shape{stroke:#c87c93;stroke-width:5;fill:none;stroke-linecap:round;transform-origin:center;animation:valveOpen var(--heart-period,.81s) ease-in-out infinite}.valve-shape.secondary{animation-delay:calc(var(--heart-period,.81s) * -.5)}@keyframes valveOpen{0%,100%{opacity:.65}38%,62%{opacity:.18}}
+.heart-progress{padding:0 21px 17px;display:grid;gap:9px}.heart-guide{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid #dce9ec;background:#f7fafb;border-radius:12px}.heart-guide b{display:block;font-size:12px;line-height:1.2}.heart-guide small{display:block;color:var(--muted);font-size:10.5px;margin-top:3px}.heart-guide .btn{padding:8px 10px;min-height:36px;white-space:nowrap}.heart-legend{display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px;color:#718795;font-size:10px}.heart-legend span{display:flex;gap:5px;align-items:center}.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#408bc1}.legend-dot.red{background:#eb6970}.heart-mini-state{font-weight:800;color:#447d89}
+/* Dynamic readouts */
+.stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:17px}.stat-card{padding:14px 16px;border:1px solid var(--line);border-radius:17px;background:#fff;min-width:0;box-shadow:0 3px 16px #23465a07}.stat-card .stat-title{display:block;font-size:10px;font-weight:770;text-transform:uppercase;letter-spacing:.065em;color:#748b9b}.stat-card strong{display:block;font-size:clamp(17px,1.6vw,26px);line-height:1.1;letter-spacing:-.8px;margin:8px 0 6px}.stat-card strong small{font-size:12px;font-weight:700;letter-spacing:0}.stat-card .stat-sub{display:block;color:#8195a1;font-size:10px}.meter{height:5px;border-radius:5px;background:#ebf0f1;overflow:hidden;margin-top:8px}.meter span{display:block;background:#2ba79a;height:100%;width:50%;border-radius:5px;transition:width .3s}.stat-card.warning .meter span{background:#e9a24b}.stat-card.alert .meter span{background:#d96971}
+.bottom-grid{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:17px;margin-top:17px}.bottom-panel{padding:17px 20px}.bottom-panel h3{font-size:16px;letter-spacing:-.35px;margin:4px 0 7px}.bottom-panel .support{color:var(--muted);font-size:11px}.action-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.action-group .btn{font-size:12px}.bottom-panel .small-note{color:#607f8d;font-size:11px;margin-top:11px}.data-head{display:flex;align-items:start;justify-content:space-between;gap:10px}.data-head button{white-space:nowrap}.live-chart{width:100%;height:120px;display:block;margin-top:10px}.chart-legend{display:flex;gap:17px;align-items:center;flex-wrap:wrap;font-size:10px;color:#587482}.chart-legend i{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}.chart-legend .l1{background:#dd766f}.chart-legend .l2{background:#278e91}.eco-control{margin-top:13px;background:#f7fbfa;border:1px solid #e0eceb;border-radius:14px;padding:11px 13px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.control-field label{font-size:10px;font-weight:800;color:#5d7986;display:flex;justify-content:space-between;align-items:center}.control-field input{width:100%;accent-color:#168b80;margin-top:7px}.control-field output{font-weight:850;color:#284e5a}
+/* Real data */
+.real-screen{margin-top:24px}.real-hero{background:#eaf7f4;border:1px solid #cde9e3;border-radius:19px;padding:19px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.real-hero h2{font-size:23px;letter-spacing:-.9px;margin:4px 0}.real-hero p{margin:0;font-size:12px;color:#4e767b;max-width:750px}.real-state{border:1px solid #b7dfd5;color:#146e66;border-radius:100px;background:#fff;padding:8px 13px;font-weight:800;font-size:11px;white-space:nowrap}.real-controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px;background:#fff;border:1px solid var(--line);padding:16px;border-radius:15px;margin:16px 0}.real-controls label{display:flex;flex-direction:column;gap:5px;min-width:185px;font-size:11px;color:#69828e;font-weight:750}.real-controls select{background:#fbfdfd;border:1px solid #cfdfe1;border-radius:10px;padding:10px;color:#213d4d;max-width:100%;min-width:0}.real-controls .btn{margin-left:auto}.real-years{display:flex;gap:12px;align-items:center;flex:1 1 250px}.real-years label{min-width:54px}.real-years input{flex:1;accent-color:var(--teal)}.real-years output{min-width:40px;font-weight:850;color:#1b6a6b;font-size:17px}.real-panels{display:grid;grid-template-columns:1fr 1fr;gap:16px}.real-panel{padding:18px}.real-panel h3{margin:3px 0 5px;letter-spacing:-.3px;font-size:16px}.real-panel .big-value{font-size:29px;font-weight:850;margin:8px 0 2px;letter-spacing:-.8px}.real-panel .sub{color:var(--muted);font-size:11px}.data-svg{width:100%;height:auto;display:block}.real-foot{padding:15px 18px;background:#fffaf1;border:1px solid #f1dfb5;border-radius:15px;margin-top:15px;color:#755d38;font-size:12px;line-height:1.6}.sources{font-size:11px;color:#718591;display:flex;gap:15px;flex-wrap:wrap;margin-top:13px}
+/* Dialogs and notifications */
+#toast{position:fixed;z-index:1000;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translate(-50%,24px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;background:#143b4b;color:#fff;max-width:min(94vw,650px);padding:13px 18px;border-radius:13px;font-size:12px;font-weight:710;box-shadow:0 12px 35px #18394b33;text-align:center}#toast.visible{opacity:1;transform:translate(-50%,0)}.finish-overlay{position:fixed;inset:0;background:#0e2b39a6;backdrop-filter:blur(8px);z-index:200;display:grid;place-items:center;padding:20px}.finish-card{width:min(510px,100%);border-radius:26px;background:white;box-shadow:0 25px 80px #00192835;padding:30px;text-align:center}.finish-emoji{font-size:52px}.finish-card h2{font-size:27px;letter-spacing:-1px;margin:11px 0 8px}.finish-card p{color:#617b87;font-size:13px}.finish-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:18px 0}.finish-stats div{background:#f5faf9;border-radius:13px;padding:12px 6px}.finish-stats strong{display:block;font-size:21px}.finish-stats small{font-size:10px;color:#65828b}.finish-buttons{display:flex;gap:10px;justify-content:center}.finish-buttons .btn{flex:1}
+dialog{border:1px solid #d7e7e8;border-radius:22px;box-shadow:0 25px 90px #0f304754;width:min(700px,94vw);max-height:85dvh;overflow:auto;padding:26px;color:var(--ink)}dialog::backdrop{background:rgba(9,37,53,.56);backdrop-filter:blur(4px)}dialog h2{font-size:24px;letter-spacing:-1px;margin:5px 0 10px}dialog h3{font-size:15px;margin:22px 0 5px}dialog p{font-size:13px;color:#4e6d7b;line-height:1.65}dialog li{font-size:13px;color:#486775;margin-bottom:8px}.dialog-top{display:flex;gap:10px;justify-content:space-between;align-items:start}.dialog-top button{background:#f1f6f6;border:0;width:35px;height:35px;border-radius:10px;color:#4e6b7c;font-size:19px}.readers{background:#f3faf9;border-radius:12px;padding:12px 16px;font-size:12px;line-height:1.65;color:#446d73}.footnote{text-align:center;margin-top:18px;color:#879aa3;font-size:11px}
+@media(max-width:1200px){.page-shell{padding-left:16px;padding-right:16px}.game-grid{grid-template-columns:1fr 1fr}.world-stage{height:325px}.heart-svg{max-height:325px}.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:950px){.game-grid,.bottom-grid{grid-template-columns:1fr}.world-stage{height:350px}.heart-svg{max-height:370px}.heart-visual{max-width:700px;margin:auto}.topbar{flex-wrap:wrap}.app-tabs{order:3;width:100%;justify-content:center}.hero-intro{align-items:start}.real-panels{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:650px){:root{--header:64px}.page-shell{padding:0 11px 30px}.topbar{gap:8px;min-height:60px}.brand{min-width:0;gap:8px}.brand-mark{width:37px;height:37px;border-radius:12px}.brand-name{font-size:16px}.brand-sub{font-size:9px}.app-tabs{padding:4px;gap:2px}.app-tab{padding:9px 9px;font-size:11.5px;flex:1}.header-tools{gap:5px}.mini-action{padding:8px;font-size:11px}.hero-intro{flex-direction:column;gap:10px;margin:18px 2px 13px}.hero-intro h1{font-size:26px}.hero-intro p{font-size:12px}.sim-note{max-width:none;width:100%;padding:8px 11px}.missions{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.mission-tab{padding:9px 6px;min-height:94px;flex-direction:column;gap:5px;text-align:center;border-radius:12px;justify-content:center}.mission-icon{width:32px;height:32px;font-size:21px;border-radius:10px}.mission-copy b{font-size:10.5px}.mission-copy small{font-size:9px;margin-top:2px}.mission-medal{right:5px;top:2px;font-size:12px}.goalbar{align-items:start;gap:6px;padding:10px 12px}.goalbar strong{font-size:12px}.goalbar small{font-size:10px}.goalbar .pill{font-size:9px;padding:4px 6px}.panel{border-radius:17px}.panel-head{padding:13px 13px 10px}.panel-head h2{font-size:17px}.panel-badges{gap:3px}.tag{font-size:9px;padding:4px 6px}.world-stage{height:295px;margin:0 7px;border-radius:13px}.station-graphic{font-size:38px!important}.station-label{font-size:8.5px;padding:2px 3px}.station{min-width:49px}.tree-station{top:50%}.water-station{top:62%}.shelter-station{top:54%}.school-station{top:51%}.traveler{height:75px;width:51px;top:67%}.world-time{max-width:55%;font-size:9px;padding:5px 7px}.world-hint{font-size:9px}.world-controls{padding:10px 12px}.play-controls{gap:5px}.btn{font-size:11px;padding:9px 10px;min-height:38px}.tool-shelf{gap:6px;padding:8px}.tool{padding:6px 8px;font-size:10px}.tool-shelf b{width:100%;margin:0}.heart-visual{padding:0 4px}.heart-svg{max-height:none}.heart-progress{padding:0 12px 13px}.heart-guide{padding:8px 10px}.heart-guide .btn{padding:8px;font-size:10px}.stats-grid{gap:6px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:11px}.stat-card{padding:10px 10px;border-radius:12px}.stat-card strong{font-size:18px}.stat-card .stat-title{font-size:9px}.stat-card .stat-sub{font-size:9px}.stat-card:nth-child(4),.stat-card:nth-child(5){grid-column:span 1}.bottom-grid{gap:11px;margin-top:11px}.bottom-panel{padding:12px 14px}.bottom-panel h3{font-size:15px}.eco-control{grid-template-columns:1fr 1fr;padding:8px}.real-hero{padding:14px;align-items:start;flex-direction:column}.real-hero h2{font-size:20px}.real-controls{padding:11px;gap:9px}.real-controls label{flex:1 1 145px;min-width:0}.real-controls .btn{margin-left:0}.real-years{flex:1 1 100%}.real-panel{padding:13px}dialog{padding:17px}.finish-card{padding:20px 15px}.finish-card h2{font-size:22px}.finish-stats strong{font-size:17px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="page-shell">
+<header class="topbar">
+ <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 50 50" fill="none"><path d="M5 27H14L19 13L27 37L32 24H45" stroke="#078b83" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">PULSO <span style="color:#07938c">DA CIDADE</span></div><div class="brand-sub">CardioClima BR · Ciências em movimento</div></div></div>
+ <nav class="app-tabs" aria-label="Modos do jogo"><button class="app-tab active" id="tabGame" aria-pressed="true">🎮 Aventura</button><button class="app-tab" id="tabReal" aria-pressed="false">📈 Dados reais</button><button class="app-tab" id="tabGuide" aria-pressed="false">🧭 Como jogar</button></nav>
+ <div class="header-tools"><button class="mini-action" id="soundToggle" aria-pressed="false" title="Ativar ou desativar batimentos sonoros">♪ Som</button><button class="mini-action" id="restartButton" title="Recomeçar esta missão">↻ Reiniciar</button></div>
+</header>
+<main>
+<div id="gameScreen">
+<section class="hero-intro"><div><span class="eyebrow">MUNDO DE FORA + MUNDO DE DENTRO</span><h1>O que acontece lá fora<br>também muda aqui dentro.</h1><p>Mova o personagem, planeje um caminho mais protegido e conduza uma hemácia pelo coração. Os gráficos respondem às suas decisões.</p></div><div class="sim-note"><span class="dot"></span><span><strong>Simulação educativa:</strong> clima, fumaça e respostas do corpo nesta aventura são cenários ilustrativos, não medições nem previsões médicas.</span></div></section>
+<section class="missions" aria-label="Escolher missão">
+ <button class="mission-tab active" data-mission="heat" aria-pressed="true"><span class="mission-icon" aria-hidden="true">☀️</span><span class="mission-copy"><b>01 · Calor na escola</b><small>Sombra, água e movimento</small></span><span class="mission-medal" data-medal="heat"></span></button>
+ <button class="mission-tab" data-mission="smoke" aria-pressed="false"><span class="mission-icon" aria-hidden="true">🌫️</span><span class="mission-copy"><b>02 · Fumaça no bairro</b><small>Proteção e ar interno</small></span><span class="mission-medal" data-medal="smoke"></span></button>
+ <button class="mission-tab" data-mission="both" aria-pressed="false"><span class="mission-icon" aria-hidden="true">🌡️</span><span class="mission-copy"><b>03 · Dois desafios</b><small>Calor + fumaça juntos</small></span><span class="mission-medal" data-medal="both"></span></button>
+</section>
+<div class="goalbar"><div><strong id="missionTitle">Missão 01 · Caminho da escola</strong><small id="missionObjective">Chegue à escola, aproveitando a sombra e o bebedouro.</small></div><span class="pill" id="missionState">● EM ANDAMENTO</span></div>
+<div class="game-grid">
+ <article class="panel"><div class="panel-head"><div class="panel-title-meta"><span class="eyebrow">01 · O AMBIENTE</span><h2>A cidade que você percorre</h2><div class="support">Arraste o personagem ou toque em um destino.</div></div><div class="panel-badges"><span class="tag heat" id="worldTempTag">38 °C</span><span class="tag smoke" id="worldSmokeTag">12 µg/m³ PM2,5</span></div></div>
+  <div class="world-stage hot" id="worldStage" aria-label="Cenário interativo de uma cidade com árvores, bebedouro, abrigo, escola e personagem arrastável">
+   <div class="sky-sun"></div><div class="world-cloud cloud-a">☁</div><div class="world-cloud cloud-b">☁</div><div class="smoke-plume"></div><div class="smoke-plume second"></div><div class="smoke-plume third"></div><div class="horizon"></div><div class="scene-hill"></div><div class="scene-hill alt"></div><div class="scene-walkway"></div><div class="scene-road"></div>
+   <span class="world-time" id="worldTime">⏱ <b>00:00</b> · simulador</span>
+   <button class="station tree-station" data-station="tree" title="Sombra: aproxime-se e diminua a exposição ao calor"><span class="station-graphic">🌳</span><span class="station-label">Sombra</span></button>
+   <button class="station water-station" data-station="water" title="Bebedouro: aproxime-se e use o botão beber água"><span class="station-graphic">🚰</span><span class="station-label">Água</span></button>
+   <button class="station shelter-station" data-station="shelter" title="Abrigo: entre para se proteger da fumaça"><span class="station-graphic">🏠</span><span class="station-label">Abrigo</span></button>
+   <button class="station school-station" data-station="school" title="Escola: destino da missão de calor"><span class="station-graphic">🏫</span><span class="station-label">Escola</span></button>
+   <div id="placedObjects"></div>
+   <div class="traveler" id="traveler" tabindex="0" role="slider" aria-label="Personagem. Use setas esquerda e direita para caminhar." aria-valuemin="0" aria-valuemax="100" aria-valuenow="6" style="left:6%">
+    <svg viewBox="0 0 68 104" aria-hidden="true"><ellipse cx="35" cy="99" rx="26" ry="5" fill="#295567" opacity=".17"/><g class="traveler-leg"><path class="pants" d="M25 65 L23 91 Q22 96 27 96 L33 96 L37 65Z"/><path d="M23 92 L35 92 Q38 97 33 99 H20 Q17 97 23 92Z" fill="#f5f9f8"/></g><g class="traveler-leg leg2"><path class="pants" d="M36 65 L38 92 Q38 96 43 96 L48 94 L45 65Z"/><path d="M38 92 L49 92 Q52 97 47 99 H36 Q33 97 38 92Z" fill="#eaf1f4"/></g><path class="shirt" d="M23 39 Q34 34 47 40 L50 72 Q33 78 20 69Z"/><path class="skin" d="M21 43 Q16 55 16 62 Q17 67 22 66 L30 55 L27 51 L23 57Z"/><path class="skin" d="M47 43 Q53 50 56 62 Q57 67 52 68 Q48 65 43 56Z"/><rect x="30" y="31" width="11" height="13" rx="4" class="skin"/><ellipse cx="35" cy="22" rx="17" ry="20" class="skin"/><path d="M18 22 Q13 4 31 3 Q48 1 52 15 L50 28 Q46 13 39 14 Q29 24 18 22" fill="#293d43"/><circle cx="29" cy="24" r="1.6" fill="#1d343b"/><circle cx="42" cy="24" r="1.6" fill="#1d343b"/><path d="M31 33 Q36 36 40 32" fill="none" stroke="#70443d" stroke-width="1.8" stroke-linecap="round"/><path d="M17 53 L24 50" stroke="#0b7271" stroke-width="4"/></svg>
+   </div>
+   <div class="world-hint" id="worldHint">Toque no chão para caminhar · ou arraste o personagem</div>
+  </div>
+  <div class="world-controls">
+   <div class="play-controls"><button class="btn" id="goLeft" title="Manter pressionado para voltar">◀ Voltar</button><button class="btn primary" id="goRight" title="Manter pressionado para avançar">Avançar ▶</button><button class="btn" id="paceBtn" aria-pressed="false">🚶 Caminhar</button><button class="btn amber" id="pauseBtn">Ⅱ Pausar</button></div>
+   <div class="tool-shelf" aria-label="Ferramentas de planejamento urbano"><b>Planeje o caminho:</b><button class="tool" data-tool="shade" draggable="true" title="Arraste para o cenário ou selecione e toque em um local">⛱️ Cobertura</button><button class="tool" data-tool="water" draggable="true" title="Arraste para o cenário ou selecione e toque em um local">💧 Água</button><button class="tool" data-tool="tree" draggable="true" title="Planejar cobertura arbórea no cenário">🌳 Árvore</button><span class="tool-caption">Arraste uma proteção para o cenário (ou toque nela e escolha o local). Árvore representa sombra já existente ou planejada, não crescimento instantâneo.</span></div>
+  </div>
+ </article>
+ <article class="panel"><div class="panel-head"><div><span class="eyebrow">02 · O ORGANISMO</span><h2>O coração em movimento</h2><div class="support">Conduza a hemácia pela circulação correta.</div></div><div class="panel-badges"><span class="tag" id="heartRateTag">❤ Ritmo ilustrativo: 72</span></div></div>
+  <div class="heart-visual">
+  <svg class="heart-svg" id="heartSvg" viewBox="0 0 640 440" role="img" aria-label="Coração esquemático interativo. Mostra átrios e ventrículos direitos à esquerda da imagem, esquerdos à direita, vasos e pulmões. Acompanhe o sangue e arraste a hemácia até o próximo ponto iluminado.">
+   <defs><linearGradient id="heartWarm" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8cdcb"/><stop offset="1" stop-color="#e7a1b0"/></linearGradient><linearGradient id="blueTube" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b9dcf1"/><stop offset="1" stop-color="#679bd1"/></linearGradient><linearGradient id="redTube" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffb6b3"/><stop offset="1" stop-color="#df6878"/></linearGradient></defs>
+   <text x="18" y="27" class="circulatory-note">ESQUEMA ANATÔMICO · VISTA FRONTAL</text>
+   <text x="19" y="44" style="font-size:10px;fill:#8fa0ab">Direito anatômico aparece à esquerda da tela</text>
+   <!-- Pulmões / tecidos -->
+   <g id="lungGroup"><path class="lung-organ" d="M533 133 Q507 132 499 177 Q484 233 516 249 Q546 262 549 215 L550 154 Q555 133 533 133Z"/><path class="lung-organ" d="M571 130 Q598 134 613 171 Q629 229 596 249 Q570 260 565 215 L561 155 Q557 129 571 130Z"/><path class="lung-bronchi" d="M553 115 V165 M552 165 L528 195 M552 165 L584 197"/><circle class="air-spark" cx="521" cy="186" r="4"/><circle class="air-spark" cx="592" cy="213" r="4"/><text x="552" y="280" text-anchor="middle" class="svg-label bold">PULMÕES</text><text x="552" y="298" text-anchor="middle" class="svg-label">troca de gases</text></g>
+   <g><rect x="22" y="324" width="102" height="78" rx="18" fill="#f1f7f9" stroke="#bbd4dd" stroke-width="2"/><text x="73" y="351" text-anchor="middle" class="svg-label bold">TECIDOS</text><text x="73" y="366" text-anchor="middle" class="svg-label">recebem O₂</text><text x="73" y="380" text-anchor="middle" class="svg-label">devolvem CO₂</text></g>
+   <!-- Smooth vessel fields under the schematic; arrows are decorative indicators, not literal anatomy geometry -->
+   <path d="M79 344 C129 324 151 252 168 123 C191 118 201 157 237 182" fill="none" stroke="url(#blueTube)" stroke-width="22" stroke-linecap="round" opacity=".8"/>
+   <path d="M260 307 C210 279 211 167 308 117 C389 80 445 126 546 173" fill="none" stroke="url(#blueTube)" stroke-width="18" stroke-linecap="round" opacity=".74"/>
+   <path d="M546 182 C516 220 468 230 385 195" fill="none" stroke="url(#redTube)" stroke-width="17" stroke-linecap="round" opacity=".8"/>
+   <path d="M363 313 C398 258 411 143 431 72 C456 70 457 126 478 133" fill="none" stroke="url(#redTube)" stroke-width="23" stroke-linecap="round" opacity=".82"/>
+   <path d="M431 72 C310 26 166 24 89 343" fill="none" stroke="url(#redTube)" stroke-width="10" stroke-linecap="round" opacity=".25" stroke-dasharray="6 12"/>
+   <!-- heart muscle + chambers -->
+   <g class="heart-muscle" id="heartMuscle"><path class="muscle-outer" d="M279 104 C235 81 194 119 188 169 C173 221 190 303 237 351 Q281 405 323 408 C368 398 430 337 444 264 C455 188 422 117 380 113 C350 106 333 125 314 145 Q298 107 279 104Z" fill="url(#heartWarm)"/><path class="muscle-inner" d="M281 126 C243 107 219 133 211 176 C199 233 214 301 251 335 Q292 375 322 378 C373 357 413 305 418 252 C424 201 402 138 374 140 Q337 140 321 164 L310 172Z"/>
+    <path class="heart-blue" d="M250 148 C224 140 213 169 217 205 Q223 238 273 239 L300 221 L294 168 Q273 147 250 148Z"/><path class="heart-blue" d="M240 252 Q269 242 302 249 L315 353 Q260 350 236 303 Q227 281 240 252Z"/>
+    <path class="heart-red" d="M348 153 Q392 142 403 170 Q414 194 402 234 L344 240 Q325 199 348 153Z"/><path class="heart-red" d="M341 251 Q376 243 408 252 Q401 321 348 366 L330 357Z"/>
+    <path class="septum" d="M317 232 Q312 288 328 365"/>
+    <path class="valve-shape" d="M247 240 l10 12 m20 -13 l-11 12"/><path class="valve-shape secondary" d="M358 243 l10 12 m19 -13 l-10 12"/>
+    <text x="254" y="185" text-anchor="middle" class="chamber-name">ÁTRIO</text><text x="254" y="198" text-anchor="middle" class="chamber-name">DIREITO</text><text x="261" y="281" text-anchor="middle" class="chamber-name">VENTRÍCULO</text><text x="261" y="295" text-anchor="middle" class="chamber-name">DIREITO</text>
+    <text x="377" y="180" text-anchor="middle" class="chamber-name red">ÁTRIO</text><text x="377" y="193" text-anchor="middle" class="chamber-name red">ESQUERDO</text><text x="371" y="285" text-anchor="middle" class="chamber-name red">VENTRÍCULO</text><text x="371" y="298" text-anchor="middle" class="chamber-name red">ESQUERDO</text>
+   </g>
+   <!-- Guided circulation path: conceptual placements, vessels connect in correct sequence. -->
+   <path class="blood-track venous" d="M79 371 Q128 291 175 116 L247 207 L255 249 L263 316 L300 125 Q437 95 547 177"/>
+   <path class="blood-track-over venous" d="M79 371 Q128 291 175 116 L247 207 L255 249 L263 316 L300 125 Q437 95 547 177"/>
+   <path class="blood-track arterial" d="M547 177 L483 216 L382 208 L380 252 L367 319 L431 74 Q291 0 79 371"/>
+   <path class="blood-track-over arterial" d="M547 177 L483 216 L382 208 L380 252 L367 319 L431 74 Q291 0 79 371"/>
+   <!-- interactive nodes injected by JS -->
+   <g id="flowNodes"></g>
+   <g id="rbcAvatar" tabindex="0" role="button" aria-label="Hemácia para arrastar até o próximo ponto iluminado" transform="translate(79 371)"><circle id="rbcDisc" class="rbc-disc" cx="0" cy="0" r="17"/><ellipse class="rbc-core" cx="0" cy="0" rx="8" ry="6"/><circle class="rbc-mini" cx="-6" cy="-5" r="2"/></g>
+  </svg>
+  </div>
+  <div class="heart-progress"><div class="heart-guide"><div><b id="flowCurrent">Tecidos do corpo</b><small id="flowNext">Próxima parada: veias cavas</small></div><button class="btn" id="flowAdvance" title="Avançar um ponto no fluxo">Guiar hemácia ↗</button></div><div class="heart-legend"><span><i class="legend-dot"></i> Sangue com menos O₂</span><span><i class="legend-dot red"></i> Sangue rico em O₂</span><span class="heart-mini-state" id="flowDelivery">0 voltas completas</span></div></div>
+ </article>
+</div>
+<section class="stats-grid" aria-label="Indicadores da simulação">
+ <div class="stat-card"><span class="stat-title">Ritmo ilustrativo</span><strong><span id="metricBpm">72</span> <small>bpm</small></strong><span class="stat-sub">não é previsão clínica</span></div>
+ <div class="stat-card"><span class="stat-title">Hidratação no jogo</span><strong><span id="metricHydro">84</span><small> / 100</small></strong><div class="meter"><span id="barHydro"></span></div></div>
+ <div class="stat-card"><span class="stat-title">Carga de calor</span><strong><span id="metricHeat">11</span><small> / 100</small></strong><div class="meter"><span id="barHeat"></span></div></div>
+ <div class="stat-card"><span class="stat-title">Irritação simulada</span><strong><span id="metricAir">4</span><small> / 100</small></strong><div class="meter"><span id="barAir"></span></div></div>
+ <div class="stat-card"><span class="stat-title">Índice de proteção</span><strong><span id="metricCare">93</span><small> / 100</small></strong><div class="meter"><span id="barCare"></span></div></div>
+</section>
+<section class="bottom-grid">
+ <article class="panel bottom-panel"><span class="eyebrow">03 · AGIR</span><h3>Cuidar do corpo e do caminho</h3><div class="support" id="actionHelp">Aproxime-se dos locais do mapa para usar os recursos.</div><div class="action-group"><button class="btn" id="drinkBtn">💧 Beber água</button><button class="btn" id="shelterBtn">🏠 Entrar no abrigo</button><button class="btn" id="filterBtn">🌀 Ligar filtro</button></div><p class="small-note" id="actionState">Na sombra, a exposição direta ao sol diminui. Quando há fumaça, priorize um lugar fechado e com ar mais limpo.</p></article>
+ <article class="panel bottom-panel"><div class="data-head"><div><span class="eyebrow">04 · MEDIR</span><h3>O gráfico nasce das suas ações</h3><div class="support">Resultados produzidos pela <strong>simulação do jogo</strong>, não por pessoas reais.</div></div><button class="btn" id="exportSim">↓ CSV</button></div><svg class="live-chart" id="simChart" viewBox="0 0 620 130" preserveAspectRatio="none" role="img" aria-label="Histórico da simulação com ritmo ilustrativo e índice de cuidado"></svg><div class="chart-legend"><span><i class="l1"></i> Ritmo ilustrativo (escala visual)</span><span><i class="l2"></i> Índice de proteção</span></div><div class="eco-control"><div class="control-field"><label for="tempSlider">Temperatura do cenário <output id="tempOutput">38 °C</output></label><input type="range" min="22" max="43" step="1" id="tempSlider" value="38"></div><div class="control-field"><label for="pmSlider">Fumaça · PM2,5 <output id="pmOutput">12 µg/m³</output></label><input type="range" min="0" max="200" step="5" id="pmSlider" value="12"></div></div></article>
+</section>
+</div>
+<section class="real-screen" id="realScreen" hidden>
+ <div class="real-hero"><div><span class="eyebrow">DO JOGO À CIÊNCIA</span><h2>Agora, dados verdadeiros do CardioClima.</h2><p>Explore valores por capital, ano e grupo. Diferentemente da aventura, estas séries vêm das bases do projeto. Os dois conjuntos têm métodos e períodos distintos.</p></div><span class="real-state" id="dataState">Aguardando carregamento</span></div>
+ <div class="real-controls"><label>Capital<select id="realCapital"><option>Carregando...</option></select></label><label>Indicador hospitalar<select id="realOutcome"><option value="Taxa mortalidade geral">Mortalidade hospitalar geral</option><option value="Masc">Masculino</option><option value="Fem">Feminino</option><option value="60 a 69 anos">60–69 anos</option><option value="70 a 79 anos">70–79 anos</option><option value="80 anos e mais">80 anos e mais</option></select></label><div class="real-years"><label for="realYear">Ano</label><input id="realYear" type="range" min="2008" max="2024" value="2020"><output id="realYearOut">2020</output></div><button class="btn primary" id="realReload">↻ Atualizar bases</button></div>
+ <div class="real-panels"><article class="panel real-panel"><span class="eyebrow">DADOS REAIS · SIH/SUS</span><h3 id="realHealthTitle">Mortalidade hospitalar</h3><div class="big-value" id="realHealthValue">—</div><div class="sub" id="realHealthSub">2008–2025 · ano selecionado</div><div id="healthChart"></div></article><article class="panel real-panel"><span class="eyebrow">DADOS REAIS · CAMS/EAC4</span><h3>PM2,5 · média anual</h3><div class="big-value" id="realPmValue">—</div><div class="sub" id="realPmSub">2008–2024 · µg/m³</div><div id="pmRealChart"></div></article></div>
+ <div class="real-foot"><strong>Importante:</strong> os valores hospitalares são taxas relativas às internações no SIH/SUS, não ao total da população. PM2,5 é estimativa anual municipal derivada de reanálise. <strong>Gráficos que mudam juntos não demonstram causalidade.</strong> O jogo não transforma os valores reais em risco de uma criança específica. Para a análise estatística, consulte o <a href="https://ernandes-sobreira.github.io/cardio-br/" target="_blank" rel="noopener">CardioClima BR</a>.</div>
+ <div class="sources"><a href="https://www.nhlbi.nih.gov/health/heart/blood-flow" target="_blank" rel="noopener">Anatomia · NIH</a><a href="https://www.cdc.gov/wildfires/risk-factors/wildfire-smoke-and-children.html" target="_blank" rel="noopener">Fumaça e crianças · CDC</a><a href="https://doi.org/10.5281/zenodo.16374139" target="_blank" rel="noopener">PM2,5 · Zenodo</a></div>
+</section>
+</main>
+<footer class="footnote">PULSO DA CIDADE · Um jogo do ecossistema CardioClima BR · Ernandes Sobreira Oliveira Junior & Letícia Carvalho Zen · Aprender fazendo, sem quiz.</footer>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div class="finish-overlay" id="finishOverlay" hidden><div class="finish-card" role="dialog" aria-labelledby="finishTitle" aria-modal="true"><div class="finish-emoji">🏅</div><span class="eyebrow">MISSÃO CONCLUÍDA</span><h2 id="finishTitle">Você conseguiu!</h2><p id="finishText"></p><div class="finish-stats"><div><strong id="finishHydro">—</strong><small>Hidratação</small></div><div><strong id="finishCare">—</strong><small>Proteção</small></div><div><strong id="finishFlow">—</strong><small>Voltas da hemácia</small></div></div><div class="finish-buttons"><button class="btn" id="finishRetry">↻ Jogar de novo</button><button class="btn primary" id="finishNext">Próxima missão →</button></div></div></div>
+<dialog id="guideDialog"><div class="dialog-top"><div><span class="eyebrow">CADERNO DO EXPLORADOR</span><h2>Não é quiz. É um laboratório para brincar.</h2></div><button type="button" id="guideClose" aria-label="Fechar">×</button></div><p>Você controla dois mundos: a cidade e a circulação sanguínea. As decisões alteram indicadores <strong>fictícios da simulação</strong>, que aparecem num gráfico. Depois, no modo Dados reais, você explora séries verdadeiras do CardioClima BR.</p><h3>Como movimentar</h3><ul><li><strong>Cidade:</strong> arraste o personagem, toque no caminho ou segure os botões Voltar/Avançar. No teclado, use ← e → (ou A e D).</li><li><strong>Recursos:</strong> aproxime-se do bebedouro e clique em Beber água. No abrigo, entre e ligue o filtro quando houver fumaça.</li><li><strong>Planejar:</strong> arraste Cobertura, Água ou Árvore para o cenário — ou toque na ferramenta e depois no lugar onde deseja colocá-la.</li><li><strong>Coração:</strong> arraste a hemácia para o próximo círculo que pisca; você também pode tocar no círculo ou usar o botão Guiar hemácia.</li><li><strong>Dados:</strong> use as duas réguas para experimentar situações, observe o gráfico e exporte suas ações como CSV.</li></ul><h3>Três missões jogáveis</h3><p><strong>01. Calor na escola:</strong> caminho até a escola com sombra e água. <strong>02. Fumaça no bairro:</strong> procure ambiente interno e filtre o ar. <strong>03. Calor + fumaça:</strong> combine as estratégias com menor esforço.</p><h3>O que significa o gráfico?</h3><div class="readers">As unidades 0–100 de calor, irritação e proteção são índices inventados para aprender a comparar cenários. O indicador de batimentos também é apenas ilustrativo: <strong>não prevê frequência cardíaca nem saturação de oxigênio de crianças reais</strong>. A fumaça pode prejudicar a saúde respiratória e cardiovascular, mas não implica que toda criança terá queda imediata da oxigenação. A animação do coração mostra o trajeto correto do sangue; não simula doenças ou valvopatias.</div><h3>Segurança e ciência</h3><p>Durante episódios de fumaça intensa, medidas adequadas incluem reduzir atividade ao ar livre, permanecer em local interno com ar mais limpo e consultar alertas oficiais. Se estiver muito quente, procure sombra, hidratação e reduza esforço. Em condições reais, adultos responsáveis e orientações de saúde pública prevalecem sobre qualquer resultado do jogo.</p><div style="display:flex;justify-content:end;margin-top:18px"><button type="button" class="btn primary" id="guideStart">Vamos jogar →</button></div></dialog>
+<script>
+'use strict';
+/* Pulso da Cidade — engine sem bibliotecas externas. Fontes científicas ao final da página. */
+const byId = id => document.getElementById(id);
+const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+const fmt = (v,d=0)=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:d,minimumFractionDigits:d}).format(v);
+const SCENARIOS={
+ heat:{title:'Missão 01 · Calor na escola',objective:'Chegue à escola, busque sombra ou água e complete 1 volta da hemácia.',temp:38,pm:12,goal:'school',conclusion:'Você observou como sombra, água e ritmo de movimento mudaram o cenário de calor. A circulação levou oxigênio aos tecidos!'},
+ smoke:{title:'Missão 02 · Fumaça no bairro',objective:'Vá a um abrigo com ar mais limpo, ligue o filtro e complete 1 volta da hemácia.',temp:29,pm:115,goal:'shelter',conclusion:'Você reduziu a exposição à fumaça e acompanhou a passagem do sangue pelos pulmões. A fumaça exige proteção, não uma corrida.'},
+ both:{title:'Missão 03 · Calor + fumaça',objective:'Combine sombra, água e ar interno filtrado; depois complete 1 volta da hemácia.',temp:40,pm:150,goal:'shelter',conclusion:'Você combinou medidas de proteção para calor e fumaça. Os índices da simulação responderam às suas ações.'}
+};
+const STATIONS={tree:21,water:40,shelter:69,school:91};
+const FLOW=[
+ {x:79,y:371,name:'Tecidos do corpo',hint:'O sangue retorna com menos oxigênio.'},
+ {x:175,y:116,name:'Veias cavas',hint:'O sangue das veias entra no coração.'},
+ {x:247,y:207,name:'Átrio direito',hint:'O sangue chega ao átrio direito.'},
+ {x:255,y:249,name:'Válvula tricúspide',hint:'Permite a passagem em direção ao ventrículo direito.'},
+ {x:263,y:316,name:'Ventrículo direito',hint:'Bombeia sangue em direção aos pulmões.'},
+ {x:300,y:125,name:'Artéria pulmonar',hint:'Leva sangue com menos oxigênio aos pulmões.'},
+ {x:547,y:177,name:'Pulmões',hint:'O sangue libera CO₂ e recebe O₂.'},
+ {x:483,y:216,name:'Veias pulmonares',hint:'Trazem sangue rico em O₂ para o coração.'},
+ {x:382,y:208,name:'Átrio esquerdo',hint:'Recebe o sangue oxigenado vindo dos pulmões.'},
+ {x:380,y:252,name:'Válvula mitral',hint:'Direciona o sangue ao ventrículo esquerdo.'},
+ {x:367,y:319,name:'Ventrículo esquerdo',hint:'Bombeia sangue para o corpo.'},
+ {x:431,y:74,name:'Aorta',hint:'A grande artéria distribui sangue pelo organismo.'},
+ {x:79,y:371,name:'Tecidos do corpo',hint:'O oxigênio é entregue aos tecidos. Circulação completa!'}
+];
+let game, lastFrame=0, chartClock=0, lastBeat=0, audioCtx=null, soundEnabled=false, toastTimer=0, held=0, personDrag=null, rbcDrag=null, activeTool=null, toolDrag=null, screen='game', realPromise=null, realData=null;
+let progress={};try{progress=JSON.parse(localStorage.getItem('pulso_missions_v1')||'{}')}catch{}
+function saveProgress(){try{localStorage.setItem('pulso_missions_v1',JSON.stringify(progress))}catch{}}
+function toast(message,duration=3400){const el=byId('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),duration)}
+function fieldPx(event,element){const box=element.getBoundingClientRect();return {x:(event.clientX-box.left)/box.width,y:(event.clientY-box.top)/box.height}}
+function setMission(key,{announce=true}={}){
+ const def=SCENARIOS[key];if(!def)return;
+ game={mission:key,x:6,target:null,seconds:0,temp:def.temp,pm:def.pm,hydration:84,heat:11,irritation:4,care:93,bpm:72,pace:'walk',moving:false,indoors:false,filter:false,paused:false,finished:false,flowIndex:0,flowLoops:0,oxygen:false,added:[],history:[],weatherSample:0,drank:0,touchedShade:false,touchedShelter:false};held=0;activeTool=null;
+ byId('missionTitle').textContent=def.title;byId('missionObjective').textContent=def.objective;byId('missionState').textContent='● EM ANDAMENTO';
+ byId('tempSlider').value=def.temp;byId('pmSlider').value=def.pm;byId('paceBtn').textContent='🚶 Caminhar';byId('paceBtn').setAttribute('aria-pressed','false');byId('pauseBtn').textContent='Ⅱ Pausar';
+ byId('placedObjects').replaceChildren();byId('finishOverlay').hidden=true;
+ document.querySelectorAll('[data-mission]').forEach(el=>{const yes=el.dataset.mission===key;el.classList.toggle('active',yes);el.setAttribute('aria-pressed',String(yes))});
+ document.querySelectorAll('.tool').forEach(el=>el.classList.remove('active'));
+ updateEnvironmentalVisual();updateWorld();updateFlow();updateMetrics();updateSimChart();updateMedals();
+ if(announce)toast('Nova missão: '+def.title+'. Mova o personagem e a hemácia!');
+}
+function effectivePM(){if(!game.indoors)return game.pm;return game.pm*(game.filter?.2:.6)}
+function isShaded(){return game.indoors||Math.abs(game.x-STATIONS.tree)<11||game.added.some(p=>(p.kind==='shade'||p.kind==='tree')&&Math.abs(p.x-game.x)<11)}
+function nearWater(){return Math.abs(game.x-STATIONS.water)<11||game.added.some(p=>p.kind==='water'&&Math.abs(p.x-game.x)<10)}
+function nearShelter(){return Math.abs(game.x-STATIONS.shelter)<13}
+function updateEnvironmentalVisual(){
+ const world=byId('worldStage');world.classList.toggle('hot',game.temp>=34);world.classList.toggle('smoky',game.pm>=45);
+ byId('worldTempTag').textContent=game.temp+' °C';byId('worldSmokeTag').textContent=game.pm+' µg/m³ PM2,5';byId('tempOutput').textContent=game.temp+' °C';byId('pmOutput').textContent=game.pm+' µg/m³';
+}
+function updateWorld(){
+ const player=byId('traveler');player.style.left=game.x+'%';player.classList.toggle('walking',game.moving);player.setAttribute('aria-valuenow',String(Math.round(game.x)));
+ document.querySelectorAll('[data-station]').forEach(item=>{item.classList.toggle('is-near',Math.abs(STATIONS[item.dataset.station]-game.x)<11)});
+ const m=Math.floor(game.seconds/60),s=Math.floor(game.seconds%60);byId('worldTime').innerHTML='⏱ <b>'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'</b> · cenário simulado';
+ let context='';if(game.indoors)context=game.filter?'🌀 Você está protegido em ambiente filtrado.':'🏠 Dentro do abrigo. Ative o filtro se houver fumaça.';
+ else if(nearWater())context='💧 Perto do bebedouro: use Beber água.';
+ else if(nearShelter())context='🏠 Abrigo próximo: entre para reduzir exposição.';
+ else if(isShaded())context='🌳 A sombra diminui a carga de calor.';
+ else if(game.x>84)context='🏫 Você está perto da escola.';
+ else context='Mova o personagem com o dedo, toque no mapa ou segure ▶';
+ byId('worldHint').textContent=context;
+ byId('actionHelp').textContent=nearWater()?'Você está perto da água. Pode beber.':nearShelter()?'Abrigo próximo: entre e ative o filtro de ar.':isShaded()?'Você está na sombra. O corpo recebe menos calor.':'Aproxime-se dos recursos no cenário para usá-los.';
+ byId('drinkBtn').disabled=game.finished||!nearWater();byId('shelterBtn').disabled=game.finished||!nearShelter();byId('filterBtn').disabled=game.finished||!game.indoors;
+ byId('shelterBtn').textContent=game.indoors?'🚪 Sair do abrigo':'🏠 Entrar no abrigo';byId('filterBtn').textContent=game.filter?'🌀 Filtro ligado':'🌀 Ligar filtro';
+ byId('actionState').textContent=(game.indoors?(game.filter?'Ar interno protegido por filtro (simplificação do jogo).':'O abrigo reduz a entrada de fumaça; um filtro pode ajudar ainda mais.'):(isShaded()?'Sombra ativa: menor ganho de calor neste trecho.':'Exposição ao ar livre. Procure sombra no calor e refúgio quando houver fumaça.'));
+}
+function movePerson(x){
+ if(!game||game.finished)return;
+ game.x=clamp(x,5,95);game.target=null;
+ if(game.indoors&&Math.abs(game.x-STATIONS.shelter)>11)game.indoors=false;
+ if(isShaded())game.touchedShade=true;
+ updateWorld();checkGoal();
+}
+function playerTarget(x){if(!game||game.finished)return;game.target=clamp(x,5,95);game.paused=false;byId('pauseBtn').textContent='Ⅱ Pausar';}
+function drink(){if(game.finished)return;if(!nearWater()){toast('Aproxime-se de um bebedouro no cenário.');return}game.hydration=clamp(game.hydration+30,0,100);game.drank++;toast('💧 Você tomou água. Observe a barra de hidratação!');updateMetrics();updateWorld();checkGoal()}
+function shelter(){if(game.finished)return;if(!nearShelter()){toast('Chegue perto do abrigo primeiro.');return}game.indoors=!game.indoors;game.target=null;game.touchedShelter=true;toast(game.indoors?'🏠 Você entrou no abrigo. O ar interno tende a ser mais protegido.':'🚪 Você voltou para o ambiente externo.');updateWorld();checkGoal()}
+function toggleFilter(){if(game.finished)return;if(!game.indoors){toast('O filtro deve ser usado no ambiente interno.');return}game.filter=!game.filter;toast(game.filter?'🌀 Filtro ligado! A exposição interna simulada diminuiu.':'Filtro desligado.');updateWorld();checkGoal()}
+function setPace(){game.pace=game.pace==='walk'?'run':'walk';const run=game.pace==='run';byId('paceBtn').textContent=run?'🏃 Correr':'🚶 Caminhar';byId('paceBtn').setAttribute('aria-pressed',String(run));toast(run?'Você está correndo: a circulação acelera e a exposição pode aumentar.':'Caminhada: esforço mais leve.',2000)}
+function checkGoal(){if(!game||game.finished)return;const def=SCENARIOS[game.mission];const reached=def.goal==='school'?game.x>=88:(nearShelter()&&game.indoors&&game.filter);if(!reached)return;
+ if(game.flowLoops===0){byId('missionState').textContent='◉ COMPLETE O CICLO DO SANGUE';return}
+ game.finished=true;game.moving=false;game.target=null;held=0;progress[game.mission]=true;saveProgress();updateMedals();byId('missionState').textContent='✓ CONCLUÍDA';byId('finishTitle').textContent=def.title.replace(/Missão \d+ · /,'')+' concluída!';byId('finishText').textContent=def.conclusion;byId('finishHydro').textContent=Math.round(game.hydration)+'/100';byId('finishCare').textContent=Math.round(game.care)+'/100';byId('finishFlow').textContent=String(game.flowLoops);byId('finishOverlay').hidden=false;
+}
+function updateMedals(){document.querySelectorAll('[data-medal]').forEach(el=>el.textContent=progress[el.dataset.medal]?'★':'')}
+function updateMetrics(){
+ game.care=clamp(100-(100-game.hydration)*.24-game.heat*.45-game.irritation*.46,0,100);
+ game.bpm=Math.round(clamp(69+(game.moving?(game.pace==='run'?31:10):0)+game.heat*.20,65,150));
+ const vals=[['metricBpm',game.bpm],['metricHydro',game.hydration],['metricHeat',game.heat],['metricAir',game.irritation],['metricCare',game.care]];
+ for(const [id,v]of vals)byId(id).textContent=Math.round(v);
+ for(const [id,val]of [['barHydro',game.hydration],['barHeat',game.heat],['barAir',game.irritation],['barCare',game.care]]){const bar=byId(id);bar.style.width=clamp(val,0,100)+'%';const card=bar.closest('.stat-card');card.classList.toggle('warning',(id==='barHydro'||id==='barCare')?val<55:val>45);card.classList.toggle('alert',(id==='barHydro'||id==='barCare')?val<25:val>75)}
+ byId('heartRateTag').textContent='❤ Ritmo ilustrativo: '+game.bpm;
+ byId('heartSvg').style.setProperty('--heart-period',60/game.bpm+'s');
+ byId('lungGroup').style.opacity=clamp(1-game.irritation/240,.62,1);
+}
+function recordSample(){game.history.push({t:+game.seconds.toFixed(1),mission:game.mission,x:+game.x.toFixed(2),temp:game.temp,pm:game.pm,pmEffective:+effectivePM().toFixed(1),bpm:game.bpm,hydration:+game.hydration.toFixed(1),heat:+game.heat.toFixed(1),air:+game.irritation.toFixed(1),protection:+game.care.toFixed(1),pace:game.pace,indoors:game.indoors,filter:game.filter,heartLoops:game.flowLoops});if(game.history.length>200)game.history.shift()}
+function updateSimChart(){
+ const svg=byId('simChart');const hist=game.history.length?game.history:[{t:0,bpm:game.bpm,protection:game.care}];
+ const x0=29,x1=599,y0=11,y1=110;const maxT=Math.max(20,hist[hist.length-1].t);const coords=(key,fn)=>hist.map((r,i)=>{const x=x0+(r.t/maxT)*(x1-x0),y=y1-clamp(fn(r),0,100)/100*(y1-y0);return `${x.toFixed(1)},${y.toFixed(1)}`}).join(' ');
+ const grid=[0,25,50,75,100].map(v=>{const y=y1-v/100*(y1-y0);return `<line x1="${x0}" x2="${x1}" y1="${y}" y2="${y}" stroke="#e5eff0"/><text x="${x0-6}" y="${y+3}" text-anchor="end" fill="#91a5ad" font-size="9">${v}</text>`}).join('');
+ const p1=coords('bpm',r=>(r.bpm-60)/90*100),p2=coords('protection',r=>r.protection);
+ svg.innerHTML=grid+`<polyline fill="none" stroke="#df7a76" stroke-width="3" points="${p1}" stroke-linecap="round" stroke-linejoin="round"/><polyline fill="none" stroke="#228d88" stroke-width="3" points="${p2}" stroke-linecap="round" stroke-linejoin="round"/><text x="600" y="124" text-anchor="end" fill="#94a9b1" font-size="9">${Math.floor(maxT)} s</text>`;
+}
+function exportCSV(){
+ recordSample();const h=['t','mission','x','temp','pm','pmEffective','bpm','hydration','heat','air','protection','pace','indoors','filter','heartLoops'];
+ const title='tempo_s,missao,posicao_pct,temperatura_c_simulada,pm25_ug_m3_simulado,exposicao_pm25_efetiva_simulada,ritmo_ilustrativo_bpm,hidratacao_indice,carga_calor_indice,irritacao_indice,protecao_indice,modo_movimento,em_abrigo,filtro_ligado,voltas_hemacia';
+ const csv='\ufeff# DADOS FICTÍCIOS DO JOGO; não são medições fisiológicas ou ambientais\n'+title+'\n'+game.history.map(r=>h.map(k=>String(r[k]).replace('.',',')).join(';')).join('\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pulso-da-cidade_simulacao_'+game.mission+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1800);toast('📈 CSV da simulação exportado. Os valores são fictícios.');
+}
+function frame(now){
+ const dt=lastFrame?clamp((now-lastFrame)/1000,0,.06):0;lastFrame=now;
+ if(game&&!game.paused&&!game.finished&&screen==='game'){
+  game.seconds+=dt;
+  let dir=held;
+  if(!dir && game.target!=null){const diff=game.target-game.x;if(Math.abs(diff)<.35)game.target=null;else dir=Math.sign(diff)}
+  game.moving=!!dir;
+  if(dir){game.x=clamp(game.x+dir*(game.pace==='run'?9:5)*dt,5,95);if(game.indoors&&Math.abs(game.x-STATIONS.shelter)>11)game.indoors=false}
+  const shade=isShaded(),ambientHeat=Math.max(0,game.temp-29),pm=effectivePM();
+  const exertion=game.moving?(game.pace==='run'?1.8:.65):0;
+  game.hydration=clamp(game.hydration-(.036+ambientHeat*.027+exertion*.13)*dt,0,100);
+  game.heat=clamp(game.heat+((ambientHeat/10)*(.42+exertion*.6)*(shade?.35:1.0)-(shade?.38:.085))*dt,0,100);
+  game.irritation=clamp(game.irritation+((pm/150)*(.40+exertion*.54)-(game.indoors&&game.filter?.20:.08))*dt,0,100);
+  if(shade)game.touchedShade=true;
+  updateMetrics();updateWorld();
+  if(game.x>=88&&game.mission==='heat'||nearShelter()&&game.indoors&&game.filter)checkGoal();
+  game.weatherSample+=dt;if(game.weatherSample>.68){game.weatherSample=0;recordSample();updateSimChart()}
+  if(soundEnabled&&audioCtx&&now-lastBeat>60000/game.bpm){lastBeat=now;playHeartbeat()}
+ }
+ requestAnimationFrame(frame);
+}
+function playHeartbeat(){if(!audioCtx||!soundEnabled)return;const t=audioCtx.currentTime;[0,.15].forEach((offset,i)=>{try{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sine';osc.frequency.setValueAtTime(i?95:120,t+offset);osc.frequency.exponentialRampToValueAtTime(i?75:80,t+offset+.08);gain.gain.setValueAtTime(.0001,t+offset);gain.gain.exponentialRampToValueAtTime(.065,t+offset+.02);gain.gain.exponentialRampToValueAtTime(.0001,t+offset+.13);osc.connect(gain).connect(audioCtx.destination);osc.start(t+offset);osc.stop(t+offset+.14)}catch{}})}
+function toggleSound(){soundEnabled=!soundEnabled;if(soundEnabled){try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume()}catch{soundEnabled=false}}byId('soundToggle').classList.toggle('active',soundEnabled);byId('soundToggle').textContent=soundEnabled?'♫ Som ativo':'♪ Som';byId('soundToggle').setAttribute('aria-pressed',String(soundEnabled))}
+// Environment: moving and placing protective resources.
+function placeTool(kind,x){
+ if(!['shade','tree','water'].includes(kind)||game.finished)return;
+ if(game.added.length>=7){toast('O cenário já possui 7 recursos. Experimente outra estratégia!');return}
+ const obj={kind,x:clamp(x,8,91)},bubble=document.createElement('div');game.added.push(obj);
+ bubble.className='added-item';bubble.style.left=obj.x+'%';bubble.style.top=kind==='tree'?'56%':'67%';bubble.innerHTML=`${{shade:'⛱️',tree:'🌳',water:'🚰'}[kind]}<small>${{shade:'Toldo',tree:'Árvore',water:'Água'}[kind]}</small>`;byId('placedObjects').appendChild(bubble);
+ toast(kind==='water'?'Você instalou um ponto de água no cenário.':kind==='tree'?'Você planejou sombra de uma árvore existente.':'Você adicionou cobertura para reduzir exposição solar.');
+ activeTool=null;document.querySelectorAll('.tool').forEach(el=>el.classList.remove('active'));updateWorld();
+}
+function selectTool(kind){activeTool=activeTool===kind?null:kind;document.querySelectorAll('.tool').forEach(el=>el.classList.toggle('active',el.dataset.tool===activeTool));if(activeTool)toast('Toque no lugar do mapa onde deseja colocar '+({shade:'a cobertura',tree:'a árvore',water:'o bebedouro'}[kind])+'.')}
+function setupWorld(){
+ const stage=byId('worldStage');
+ stage.addEventListener('pointerdown',event=>{
+  if(event.target.closest('.station'))return;
+  const x=clamp(fieldPx(event,stage).x*100,5,95);
+  if(activeTool){placeTool(activeTool,x);return}
+  if(event.target.closest('#traveler')){personDrag={id:event.pointerId};stage.setPointerCapture?.(event.pointerId);movePerson(x);return}
+  playerTarget(x);
+ });
+ stage.addEventListener('pointermove',event=>{if(personDrag?.id===event.pointerId){movePerson(fieldPx(event,stage).x*100)}});
+ const endDrag=event=>{if(personDrag?.id===event.pointerId){personDrag=null;try{stage.releasePointerCapture(event.pointerId)}catch{}}};
+ stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+ document.querySelectorAll('[data-station]').forEach(node=>node.addEventListener('click',event=>{event.stopPropagation();if(!game.finished){playerTarget(STATIONS[node.dataset.station]);toast('Indo para: '+node.querySelector('.station-label').textContent,1200)}}));
+ function bindHeld(id,direction){const e=byId(id);e.addEventListener('pointerdown',ev=>{if(game.finished)return;held=direction;game.target=null;e.setPointerCapture?.(ev.pointerId);ev.preventDefault()});for(const type of ['pointerup','pointercancel','lostpointercapture'])e.addEventListener(type,()=>{if(held===direction)held=0});e.addEventListener('click',()=>{if(!game.finished){movePerson(game.x+direction*3)}})}
+ bindHeld('goLeft',-1);bindHeld('goRight',1);
+ window.addEventListener('keydown',e=>{if(screen!=='game'||game.finished||['INPUT','SELECT','TEXTAREA','BUTTON'].includes(document.activeElement?.tagName))return;if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){held=1;e.preventDefault()}if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){held=-1;e.preventDefault()}});
+ window.addEventListener('keyup',e=>{if(['ArrowRight','ArrowLeft','a','d','A','D'].includes(e.key))held=0});
+ for(const tool of document.querySelectorAll('[data-tool]')){
+  tool.addEventListener('click',ev=>{if(tool.dataset.suppressClick==='yes'){tool.dataset.suppressClick='';ev.preventDefault();return}selectTool(tool.dataset.tool)});
+  tool.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',tool.dataset.tool);ev.dataTransfer.effectAllowed='copy'});
+  tool.addEventListener('pointerdown',ev=>{if(ev.pointerType!=='mouse'){toolDrag={kind:tool.dataset.tool,x:ev.clientX,y:ev.clientY,started:false};tool.setPointerCapture?.(ev.pointerId)}});
+  tool.addEventListener('pointermove',ev=>{if(!toolDrag)return;if(Math.hypot(ev.clientX-toolDrag.x,ev.clientY-toolDrag.y)>10)toolDrag.started=true;if(toolDrag.started){let ghost=byId('dragToolGhost');if(!ghost){ghost=document.createElement('div');ghost.className='drag-ghost';ghost.id='dragToolGhost';ghost.style.position='fixed';document.body.appendChild(ghost)}ghost.textContent=({shade:'⛱️',water:'🚰',tree:'🌳'})[toolDrag.kind];ghost.style.left=ev.clientX+'px';ghost.style.top=ev.clientY+'px'}});
+  tool.addEventListener('pointerup',ev=>{if(!toolDrag)return;const dr=toolDrag;toolDrag=null;byId('dragToolGhost')?.remove();if(!dr.started)return;tool.dataset.suppressClick='yes';setTimeout(()=>{tool.dataset.suppressClick=''},100);const box=stage.getBoundingClientRect();if(ev.clientX>=box.left&&ev.clientX<=box.right&&ev.clientY>=box.top&&ev.clientY<=box.bottom){placeTool(dr.kind,(ev.clientX-box.left)/box.width*100)}});
+  tool.addEventListener('pointercancel',()=>{toolDrag=null;byId('dragToolGhost')?.remove()});
+ }
+ stage.addEventListener('dragover',ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='copy'});
+ stage.addEventListener('drop',ev=>{ev.preventDefault();const kind=ev.dataTransfer.getData('text/plain');placeTool(kind,fieldPx(ev,stage).x*100)});
+ byId('drinkBtn').addEventListener('click',drink);byId('shelterBtn').addEventListener('click',shelter);byId('filterBtn').addEventListener('click',toggleFilter);byId('paceBtn').addEventListener('click',setPace);
+ byId('pauseBtn').addEventListener('click',()=>{game.paused=!game.paused;byId('pauseBtn').textContent=game.paused?'▶ Continuar':'Ⅱ Pausar';toast(game.paused?'Jogo pausado.':'Jogo retomado.',1100)});
+ for(const [id,key] of [['tempSlider','temp'],['pmSlider','pm']])byId(id).addEventListener('input',e=>{game[key]=+e.target.value;updateEnvironmentalVisual();updateMetrics();updateWorld()});
+ byId('exportSim').addEventListener('click',exportCSV);
+ byId('restartButton').addEventListener('click',()=>setMission(game.mission));
+ byId('finishRetry').addEventListener('click',()=>setMission(game.mission));
+ byId('finishNext').addEventListener('click',()=>setMission(({heat:'smoke',smoke:'both',both:'heat'})[game.mission]));
+ document.querySelectorAll('[data-mission]').forEach(btn=>btn.addEventListener('click',()=>setMission(btn.dataset.mission)));
+ byId('soundToggle').addEventListener('click',toggleSound);
+}
+// Anatomic game: move an erythrocyte, rather than answering a quiz.
+function svgPoint(ev,svg){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;const m=svg.getScreenCTM();if(!m)return {x:79,y:371};const out=p.matrixTransform(m.inverse());return{x:out.x,y:out.y}}
+function initFlowNodes(){
+ const group=byId('flowNodes'),ns='http://www.w3.org/2000/svg';group.replaceChildren();
+ FLOW.forEach((node,i)=>{
+  const g=document.createElementNS(ns,'g');g.setAttribute('class','blood-node');g.setAttribute('data-flow-step',String(i));g.setAttribute('transform',`translate(${node.x} ${node.y})`);g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label','Parada '+(i+1)+': '+node.name);
+  const circle=document.createElementNS(ns,'circle');circle.setAttribute('r','20');
+  const title=document.createElementNS(ns,'title');title.textContent=node.name;
+  g.append(circle,title);g.addEventListener('click',()=>{if(i===game.flowIndex+1)flowAdvance();else if(i===game.flowIndex)toast('Você já está aqui. Siga o próximo círculo iluminado.',1900);else toast('O sangue tem um caminho. Procure o próximo círculo que pisca.',1700)});
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();g.click()}});
+  if(i===FLOW.length-1)g.style.display='none';
+  group.appendChild(g);
+ });
+}
+function updateFlow(){
+ const idx=game.flowIndex,point=FLOW[idx],next=FLOW[idx+1];
+ byId('rbcAvatar').setAttribute('transform',`translate(${point.x} ${point.y})`);
+ const oxy=idx>=7;
+ byId('rbcDisc').classList.toggle('oxygenated',oxy);
+ document.querySelectorAll('[data-flow-step]').forEach(node=>{const n=+node.dataset.flowStep;node.style.display=(n===FLOW.length-1&&idx!==FLOW.length-2)?'none':'';node.classList.toggle('is-next',n===idx+1);node.classList.toggle('is-visited',n<=idx&&n>0&&n<FLOW.length-1)});
+ byId('flowCurrent').textContent=point.name;
+ byId('flowNext').textContent=next?'Próxima parada: '+next.name:'Próxima parada: tecidos do corpo';
+ byId('flowDelivery').textContent=game.flowLoops+' '+(game.flowLoops===1?'volta completa':'voltas completas');
+ byId('flowAdvance').textContent='Guiar hemácia ↗';
+}
+function flowAdvance(){
+ if(game.finished){toast('Escolha outra missão para continuar.');return}
+ const n=game.flowIndex+1;
+ if(n===6)toast('🫁 Nos pulmões, o sangue libera CO₂ e recebe oxigênio.',2200);
+ else if(n===7)toast('🔴 O sangue rico em oxigênio retorna pelas veias pulmonares.',2200);
+ else if(n===10)toast('❤️ O ventrículo esquerdo prepara a saída para o corpo.',1800);
+ if(n>=FLOW.length-1){game.flowLoops++;game.flowIndex=0;toast('🏅 Volta completa! O oxigênio foi entregue aos tecidos.',2600)}
+ else game.flowIndex=n;
+ updateFlow();checkGoal();
+}
+function setupHeart(){
+ initFlowNodes();byId('flowAdvance').addEventListener('click',flowAdvance);
+ const avatar=byId('rbcAvatar'),svg=byId('heartSvg');
+ avatar.addEventListener('pointerdown',ev=>{if(game.finished)return;ev.preventDefault();rbcDrag={id:ev.pointerId,start:game.flowIndex};avatar.setPointerCapture?.(ev.pointerId)});
+ avatar.addEventListener('pointermove',ev=>{if(!rbcDrag||rbcDrag.id!==ev.pointerId)return;ev.preventDefault();const p=svgPoint(ev,svg);avatar.setAttribute('transform',`translate(${clamp(p.x,25,610)} ${clamp(p.y,52,409)})`)});
+ function endDrag(ev){if(!rbcDrag||rbcDrag.id!==ev.pointerId)return;const p=svgPoint(ev,svg),next=FLOW[game.flowIndex+1];rbcDrag=null;try{avatar.releasePointerCapture(ev.pointerId)}catch{}
+  if(next&&Math.hypot(p.x-next.x,p.y-next.y)<63)flowAdvance();else {updateFlow();toast('Siga o círculo que pisca, no sentido do fluxo sanguíneo.',2200)}}
+ avatar.addEventListener('pointerup',endDrag);avatar.addEventListener('pointercancel',()=>{rbcDrag=null;updateFlow()});avatar.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '||ev.key==='ArrowRight'){ev.preventDefault();flowAdvance()}});
+}
+// Separate, genuine datasets: the game never fabricates observations for the "real data" screen.
+function getDataBaseURL(){const at=location.origin+location.pathname;return at.includes('/cardio-br/')?new URL('../v3/assets/',location.href).href:'https://ernandes-sobreira.github.io/cardio-br/v3/assets/'}
+function injectScript(src){return new Promise((resolve,reject)=>{const script=document.createElement('script');let done=false;const timer=setTimeout(()=>end(new Error('Tempo limite de carregamento: '+src.split('/').at(-1))),12000);function end(err){if(done)return;done=true;clearTimeout(timer);err?reject(err):resolve()}script.src=src;script.async=false;script.onload=()=>end();script.onerror=()=>end(new Error('Não foi possível carregar '+src.split('/').at(-1)));document.head.appendChild(script)})}
+async function loadRealData(force=false){
+ if(force){realPromise=null;realData=null}
+ if(realData)return realData;
+ if(realPromise)return realPromise;
+ const badge=byId('dataState');badge.textContent='Lendo bases oficiais...';badge.style.color='#497387';
+ realPromise=(async()=>{
+  const base=getDataBaseURL();
+  if(!window.CARDIOCLIMA_PM25_ALL)await injectScript(base+'pm25-capitais-data.js');
+  if(!window.CARDIOCLIMA_DATA){
+   for(let i=1;i<=8;i++)await injectScript(base+'data-gz-part-'+String(i).padStart(2,'0')+'.js');
+   await injectScript(base+'data-loader.js');
+  }
+  const H=window.CARDIOCLIMA_READY?await window.CARDIOCLIMA_READY:window.CARDIOCLIMA_DATA;
+  const P=window.CARDIOCLIMA_PM25_ALL;
+  if(!H?.mortality?.length||!P?.annual?.length)throw new Error('As séries reais não estão completas.');
+  realData={health:H,pm:P};
+  badge.textContent='✓ Bases reais carregadas';badge.style.color='#126e57';
+  return realData;
+ })().catch(err=>{realPromise=null;badge.textContent='Indisponível sem internet';badge.style.color='#a54e45';
+   byId('healthChart').textContent='Não foi possível carregar os dados reais. Verifique a conexão ou abra a página pelo GitHub Pages.';
+   byId('pmRealChart').textContent='Nenhum valor foi inventado para substituir os dados ausentes.';
+   toast('Dados reais indisponíveis: '+err.message,4200);throw err});
+ return realPromise;
+}
+function selectCapital(){
+ if(!realData)return;const caps=Object.keys(realData.health.capitals).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+ const select=byId('realCapital'),old=select.value;select.replaceChildren();
+ for(const cap of caps){const op=document.createElement('option');op.value=cap;op.textContent=cap+' · '+(realData.health.capitals[cap].uf||'');select.appendChild(op)}
+ select.value=caps.includes(old)?old:(caps.includes('Cuiabá')?'Cuiabá':caps[0]);
+}
+function realGraph(container,series,{selected,units,color,title}){
+ const cleaned=series.filter(d=>d.value!=null&&Number.isFinite(+d.value)).map(r=>({year:+r.year,value:+r.value})).sort((a,b)=>a.year-b.year);
+ if(!cleaned.length){container.innerHTML='<p class="sub">Sem observações disponíveis neste recorte.</p>';return}
+ const W=720,H=232,l=57,r=24,top=25,b=33,yVals=cleaned.map(d=>d.value);const ymin=Math.max(0,Math.min(...yVals)-(Math.max(...yVals)-Math.min(...yVals)||1)*.14),ymax=Math.max(...yVals)+(Math.max(...yVals)-Math.min(...yVals)||1)*.14;
+ const minYear=2008,maxYear=2025;
+ const X=year=>l+(year-minYear)/(maxYear-minYear)*(W-l-r),Y=value=>top+(1-(value-ymin)/(ymax-ymin))*(H-top-b);
+ const grids=[0,.25,.5,.75,1].map(z=>{const v=ymin+(ymax-ymin)*z,y=Y(v);return `<line x1="${l}" x2="${W-r}" y1="${y}" y2="${y}" stroke="#e7eef0"/><text x="${l-9}" y="${y+4}" text-anchor="end" font-size="11" fill="#8096a1">${fmt(v,1)}</text>`}).join('');
+ const xticks=[2008,2012,2016,2020,2024].map(year=>`<text x="${X(year)}" y="${H-7}" text-anchor="middle" font-size="11" fill="#8da2a9">${year}</text>`).join('');
+ const path='M'+cleaned.map(d=>`${X(d.year).toFixed(1)} ${Y(d.value).toFixed(1)}`).join(' L');
+ const chosen=cleaned.find(d=>d.year===selected);
+ const circles=cleaned.map(d=>`<g><circle cx="${X(d.year)}" cy="${Y(d.value)}" r="${d.year===selected?6:3.2}" fill="${d.year===selected?'white':color}" stroke="${color}" stroke-width="${d.year===selected?3:1}"><title>${d.year}: ${fmt(d.value,2)} ${units}</title></circle><circle cx="${X(d.year)}" cy="${Y(d.value)}" r="14" fill="transparent"><title>${d.year}: ${fmt(d.value,2)} ${units}</title></circle></g>`).join('');
+ const cross=chosen?`<line x1="${X(chosen.year)}" x2="${X(chosen.year)}" y1="${top}" y2="${H-b}" stroke="${color}" stroke-dasharray="4 5" stroke-width="1.4" opacity=".55"/>`:'';
+ container.innerHTML=`<svg class="data-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}. Série real anual de 2008 a ${cleaned.at(-1).year}"><rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>${grids}${xticks}${cross}<path d="${path}" stroke="${color}" fill="none" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>${circles}</svg>`;
+}
+function renderReal(){
+ if(!realData)return;
+ const capital=byId('realCapital').value,outcome=byId('realOutcome').value,year=+byId('realYear').value;
+ byId('realYearOut').textContent=String(year);
+ const a=realData.health.mortality.filter(r=>r.Capital===capital&&r[outcome]!=null).map(r=>({year:+r.Ano,value:+r[outcome]}));
+ const b=realData.pm.annual.filter(r=>r.Capital===capital&&r.pm25_media!=null).map(r=>({year:+r.Ano,value:+r.pm25_media}));
+ const vA=a.find(v=>v.year===year)?.value,vB=b.find(v=>v.year===year)?.value;
+ const outcomeNames={'Taxa mortalidade geral':'Mortalidade hospitalar geral','Masc':'Mortalidade hospitalar masculina','Fem':'Mortalidade hospitalar feminina','60 a 69 anos':'Mortalidade hospitalar · 60–69 anos','70 a 79 anos':'Mortalidade hospitalar · 70–79 anos','80 anos e mais':'Mortalidade hospitalar · 80+ anos'};
+ byId('realHealthTitle').textContent=outcomeNames[outcome]||outcome;
+ byId('realHealthValue').textContent=vA==null?'—':fmt(vA,2)+' %';
+ byId('realPmValue').textContent=vB==null?'—':fmt(vB,2)+' µg/m³';
+ byId('realHealthSub').textContent=capital+' · '+year+' · óbitos/internações, não população';
+ byId('realPmSub').textContent=capital+' · '+year+' · PM2,5 médio anual estimado';
+ realGraph(byId('healthChart'),a,{selected:year,color:'#cf626c',units:'%',title:outcomeNames[outcome]||outcome});
+ realGraph(byId('pmRealChart'),b,{selected:year,color:'#168e91',units:'µg/m³',title:'PM2,5 média anual'});
+}
+async function showScreen(mode){
+ screen=mode;const real=mode==='real';byId('gameScreen').hidden=real;byId('realScreen').hidden=!real;
+ for(const [id,active]of [['tabGame',!real],['tabReal',real]]){byId(id).classList.toggle('active',active);byId(id).setAttribute('aria-pressed',String(active))}
+ if(real){try{await loadRealData();selectCapital();renderReal()}catch{}}
+}
+function setupTabs(){
+ byId('tabGame').addEventListener('click',()=>showScreen('game'));
+ byId('tabReal').addEventListener('click',()=>showScreen('real'));
+ const dlg=byId('guideDialog');const showGuide=()=>{byId('tabGuide').setAttribute('aria-pressed','true');dlg.showModal?.()||dlg.setAttribute('open','')};
+ byId('tabGuide').addEventListener('click',showGuide);
+ const closeGuide=()=>{dlg.close?.();dlg.removeAttribute('open');byId('tabGuide').setAttribute('aria-pressed','false')};
+ byId('guideClose').addEventListener('click',closeGuide);
+ byId('guideStart').addEventListener('click',()=>{closeGuide();showScreen('game')});
+ dlg.addEventListener('close',()=>byId('tabGuide').setAttribute('aria-pressed','false'));
+ for(const id of ['realCapital','realOutcome','realYear'])byId(id).addEventListener('input',renderReal);
+ byId('realReload').addEventListener('click',async()=>{try{await loadRealData(true);selectCapital();renderReal()}catch{}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){held=0;lastFrame=0}});
+ if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+function start(){setMission('heat',{announce:false});setupWorld();setupHeart();setupTabs();requestAnimationFrame(frame)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+</script>
+</body>
+</html>
