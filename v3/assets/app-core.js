@@ -18,7 +18,7 @@ function fp(v){ if(v==null || Number.isNaN(+v)) return '—'; if(+v < .001) retu
 function pct(v,d=1){ return v==null?'—':`${v>=0?'+':''}${f(v,d)}%`; }
 function pp(v,d=2){ return v==null?'—':`${v>=0?'+':''}${f(v,d)} p.p.`; }
 function safe(v){ return v == null ? null : +v; }
-function outcomeLabel(k){ return D.outcomes[k]?.label || k; }
+function outcomeLabel(k){ return k==='Taxa mortalidade geral'?'Mortalidade hospitalar · circulatórias':(D.outcomes[k]?.label || k); }
 function capitalize(s){ return s ? s[0].toUpperCase()+s.slice(1) : s; }
 
 function plotLayout(extra={}){
@@ -65,7 +65,7 @@ function pearson(x,y){
 function populateOutcomeSelect(){
   const el=$('#globalOutcome'); el.innerHTML='';
   const groups=['Geral','Sexo','Idade','Raça/cor'];
-  groups.forEach(g=>{ const og=document.createElement('optgroup'); og.label=g; Object.entries(D.outcomes).filter(([,m])=>m.group===g).forEach(([k,m])=>{ const o=document.createElement('option'); o.value=k;o.textContent=m.label;og.appendChild(o);}); el.appendChild(og); });
+  groups.forEach(g=>{ const og=document.createElement('optgroup'); og.label=g; Object.entries(D.outcomes).filter(([,m])=>m.group===g).forEach(([k,m])=>{ const o=document.createElement('option'); o.value=k;o.textContent=outcomeLabel(k);og.appendChild(o);}); el.appendChild(og); });
   el.value=state.outcome;
 }
 function populateRegions(){ const el=$('#globalRegion'); el.innerHTML='<option value="ALL">Todas as regiões</option>'+['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'].map(r=>`<option>${r}</option>`).join(''); el.value=state.region; }
