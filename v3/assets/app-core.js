@@ -78,41 +78,50 @@ function setupNav(){
   $$('[data-jump]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goPage(a.dataset.jump);}));
   $('#mobileMenu').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
 }
-function goPage(page){ state.page=page; $$('.page').forEach(p=>p.classList.remove('active')); $(`#page-${page}`).classList.add('active'); $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page)); $('#pageTitle').textContent=pageTitles[page]; $('#sidebar').classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); setTimeout(()=>{renderPage(page); window.Plotly&&$$(`#page-${page} .js-plotly-plot`).forEach(el=>Plotly.Plots.resize(el));},40); }
+function goPage(page){ state.page=page; $('.page').forEach(p=>p.classList.remove('active')); $(`#page-${page}`).classList.add('active'); $('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page)); updateContext(); $('#sidebar').classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); setTimeout(()=>{renderPage(page); window.Plotly&&$(`#page-${page} .js-plotly-plot`).forEach(el=>Plotly.Plots.resize(el));},40); }
 function setupFilters(){
-  $('#globalOutcome').addEventListener('change',e=>{state.outcome=e.target.value; renderAll();});
+  $('#globalOutcome').addEventListener('change',e=>{state.outcome=e.target.value; const P=window.CARDIOCLIMA_PM25_ALL; if(P?.outcomes?.[state.outcome]){state.envOutcome=state.outcome; if($('#envOutcome'))$('#envOutcome').value=state.outcome;} renderAll();});
   $('#globalRegion').addEventListener('change',e=>{state.region=e.target.value; populateCapitals();renderAll();});
   $('#globalCapital').addEventListener('change',e=>{state.capital=e.target.value; if(state.capital!=='ALL') state.region=D.capitals[state.capital].region; populateRegions();populateCapitals();renderAll();});
 }
-function updateContext(){ $('#filterContext').textContent=`${scopeName()} · ${outcomeLabel(state.outcome)}`; }
+function updateContext(){ const scope=scopeName(); $('#filterContext').textContent=`${scope} · ${outcomeLabel(state.outcome)}${scope==='Brasil'?' · média das capitais':''}`; $('#pageTitle').textContent=state.page==='overview'?`Panorama · ${scope}`:`${pageTitles[state.page]||'CardioClima BR'} · ${scope}`; }
 
 function getTrendForCapital(cap,outcome){ return D.analysis[outcome]?.capital_trends?.[cap] || null; }
 function classForTrend(t){ if(!t) return 'neutral'; const c=t.classificacao||''; return c.includes('queda')?'down':c.includes('alta')?'up':'neutral'; }
 
 function renderOverview(){
-  const s=seriesForScope(); const valid=s.filter(d=>d.mean!=null); if(!valid.length)return;
+  const s=seriesForScope(); const valid=s.filter(d=>d.mean!=null);
+  if(!valid.length){
+    $('#heroHeadline').textContent=`Sem observações para ${scopeName()}.`;
+    $('#heroNarrative').textContent='Altere o indicador ou o recorte geográfico para visualizar dados disponíveis.';
+    $('#heroEvidence').innerHTML='';
+    ['#breakYear','#breakBadge','#breakText','#kpiPeak','#kpiLatest','#kpiPostSlope','#kpiRobust','#kpiPeakSub','#kpiLatestSub','#kpiPostP'].forEach(k=>$(k).textContent='—');
+    $('#insightCards').innerHTML='';
+    ['overviewTrend','overviewRanking','overviewAge'].forEach(id=>plot(id,[],{}));
+    return;
+  }
   const first=valid[0], last=valid.at(-1), peak=valid.reduce((a,b)=>b.mean>a.mean?b:a);
   let headline='', narrative='', evidence=[];
-  if(state.capital==='ALL'&&state.region==='ALL'){
-    const seg=D.analysis[state.outcome].segmented_2020, bp=D.analysis[state.outcome].breakpoint;
+  const national=state.capital==='ALL'&&state.region==='ALL';
+  const bp=national?D.analysis[state.outcome]?.breakpoint:null;
+  const seg=national?D.analysis[state.outcome]?.segmented_2020:null;
+  if(national){
     if(bp){ headline=`A trajetória de ${outcomeLabel(state.outcome).toLowerCase()} muda de direção em torno de ${bp.year}.`; narrative=`O modelo de duas inclinações supera claramente a linha única (ΔAIC ${f(bp.delta_aic,1)}). Depois da inflexão, a trajetória média passa para ${pp(bp.post_slope,2)} por ano. A leitura é temporal e ecológica — não atribui causa ao ponto de mudança.`; evidence=[`ΔAIC ${f(bp.delta_aic,1)}`,`R² segmentado ${f(bp.r2,2)}`,`p da mudança ${fp(bp.p_change)}`]; }
     else { headline=`A média nacional passou de ${f(first.mean)} para ${f(last.mean)}.`; narrative='O indicador selecionado tem cobertura insuficiente para estimar uma quebra temporal com a mesma robustez.'; }
   } else if(state.capital!=='ALL'){
     const t=getTrendForCapital(state.capital,state.outcome); headline=t?`${state.capital}: ${t.classificacao}.`:`${state.capital}: série com cobertura limitada.`; narrative=t?`A inclinação estimada é ${pp(t.slope,2)} por ano e o APC é ${pct(t.apc,2)} ao ano. O q-FDR é ${fp(t.q_fdr)}, e o estimador Theil–Sen aponta ${pp(t.theil_sen,2)} por ano.`:'Não há observações suficientes para estimar a tendência robusta.'; evidence=t?[`APC ${pct(t.apc,1)}`,`q-FDR ${fp(t.q_fdr)}`,`Theil–Sen ${pp(t.theil_sen,2)}`]:[];
   } else {
-    const ch=(last.mean/first.mean-1)*100; headline=`${scopeName()}: ${ch<0?'redução':'aumento'} de ${f(Math.abs(ch),1)}% entre ${first.year} e ${last.year}.`; narrative=`A curva regional é a média simples das capitais da região. Use o módulo Tendências para separar o comportamento de cada capital e evitar que uma cidade domine a interpretação.`; evidence=[`${first.year}: ${f(first.mean)}`,`${last.year}: ${f(last.mean)}`,`Δ ${pct(ch,1)}`];
+    const ch=first.mean!==0?(last.mean/first.mean-1)*100:null; headline=ch==null?`${scopeName()}: série de ${first.year} a ${last.year}.`:`${scopeName()}: ${ch<0?'redução':'aumento'} de ${f(Math.abs(ch),1)}% entre ${first.year} e ${last.year}.`; narrative=`A curva regional é a média simples das capitais da região. Use o módulo Tendências para separar o comportamento de cada capital e evitar que uma cidade domine a interpretação.`; evidence=[`${first.year}: ${f(first.mean)}`,`${last.year}: ${f(last.mean)}`,`Δ ${pct(ch,1)}`];
   }
   $('#heroHeadline').textContent=headline; $('#heroNarrative').textContent=narrative; $('#heroEvidence').innerHTML=evidence.map(x=>`<span class="evidence-chip">${x}</span>`).join('');
 
-  const bp=D.analysis[state.outcome].breakpoint;
-  if(state.capital==='ALL'&&state.region==='ALL'&&bp){ $('#breakYear').textContent=bp.year; $('#breakBadge').textContent=bp.delta_aic>=10?'forte suporte':'suporte moderado'; $('#breakText').textContent=`Melhor ponto de inflexão descritivo por AIC. A linha pós-inflexão é ${pp(bp.post_slope,2)}/ano.`; }
+  if(national&&bp){ $('#breakYear').textContent=bp.year; $('#breakBadge').textContent=bp.delta_aic>=10?'forte suporte':'suporte moderado'; $('#breakText').textContent=`Melhor ponto de inflexão descritivo por AIC. A linha pós-inflexão é ${pp(bp.post_slope,2)}/ano.`; }
   else { $('#breakYear').textContent=state.capital==='ALL'?'—':'APC'; const t=state.capital==='ALL'?null:getTrendForCapital(state.capital,state.outcome); $('#breakBadge').textContent=t?t.classificacao:'escopo filtrado'; $('#breakText').textContent=t?`${pct(t.apc,2)} ao ano; q-FDR ${fp(t.q_fdr)}.`:'A quebra nacional é mostrada apenas sem filtro regional/capital.'; }
 
-  $('#kpiPeak').textContent=`${f(peak.mean)}%`; $('#kpiPeakSub').textContent=`${peak.year} · ${scopeName()}`;
-  $('#kpiLatest').textContent=`${f(last.mean)}%`; $('#kpiLatestSub').textContent=`${last.year} · ${pct((last.mean/peak.mean-1)*100,1)} vs pico`;
-  const seg=D.analysis[state.outcome].segmented_2020;
-  $('#kpiPostSlope').textContent=seg?`${pp(seg.post_slope,2)}/ano`:'—'; $('#kpiPostP').textContent=seg?`p ${fp(seg.post_p)} · SE cluster`:'cobertura insuficiente';
-  const ts=Object.values(D.analysis[state.outcome].capital_trends||{}).filter(Boolean); const robust=ts.filter(t=>t.classificacao?.includes('robusta')).length;
+  $('#kpiPeak').textContent=`${f(peak.mean)}%`; $('#kpiPeakSub').textContent=`${peak.year} · ${scopeName()}${national?' (média simples)':''}`;
+  $('#kpiLatest').textContent=`${f(last.mean)}%`; $('#kpiLatestSub').textContent=`${last.year} · ${peak.mean? pct((last.mean/peak.mean-1)*100,1):'—'} vs pico`;
+  $('#kpiPostSlope').textContent=seg?`${pp(seg.post_slope,2)}/ano`:'—'; $('#kpiPostP').textContent=seg?`p ${fp(seg.post_p)} · SE cluster`:'estimativa segmentada apenas no Brasil';
+  const ts=Object.entries(D.analysis[state.outcome].capital_trends||{}).filter(([cap,t])=>t&&(state.capital==='ALL'||cap===state.capital)&&(state.region==='ALL'||D.capitals[cap]?.region===state.region)).map(([,t])=>t); const robust=ts.filter(t=>t.classificacao?.includes('robusta')).length;
   $('#kpiRobust').textContent=`${robust}/${ts.length}`;
 
   const x=valid.map(d=>d.year), y=valid.map(d=>d.mean); const lo=valid.map(d=>d.ci_low), hi=valid.map(d=>d.ci_high);
@@ -121,10 +130,13 @@ function renderOverview(){
     traces.push({x:x.concat([...x].reverse()),y:hi.concat([...lo].reverse()),fill:'toself',fillcolor:'rgba(11,143,138,.12)',line:{color:'rgba(0,0,0,0)'},hoverinfo:'skip',showlegend:false});
   }
   traces.push({x,y,mode:'lines+markers',name:scopeName(),line:{color:colors.teal,width:3},marker:{size:7,color:'#fff',line:{color:colors.teal,width:2}},hovertemplate:'%{x}<br><b>%{y:.2f}%</b><extra></extra>'});
-  const shapes=[]; if(state.capital==='ALL'&&state.region==='ALL'&&bp) shapes.push({type:'line',x0:bp.year,x1:bp.year,y0:0,y1:1,yref:'paper',line:{color:colors.amber,width:2,dash:'dot'}});
+  const shapes=[]; if(national&&bp) shapes.push({type:'line',x0:bp.year,x1:bp.year,y0:0,y1:1,yref:'paper',line:{color:colors.amber,width:2,dash:'dot'}});
   plot('overviewTrend',traces,{shapes,yaxis:{title:'Taxa hospitalar (%)',gridcolor:'#edf2f6',zeroline:false},xaxis:{dtick:2,gridcolor:'#f0f3f6'}});
 
-  const yr=last.year; const rankRows=D.mortality.filter(r=>r.Ano===yr && r[state.outcome]!=null && (state.region==='ALL'||r['Região']===state.region)).sort((a,b)=>b[state.outcome]-a[state.outcome]).slice(0,12).reverse();
+  const yr=last.year;
+  if($('#overviewRankYear'))$('#overviewRankYear').textContent=String(yr);
+  if($('#overviewRankTitle'))$('#overviewRankTitle').textContent=state.capital==='ALL'?'Ranking das capitais · '+scopeName():'Capital selecionada · '+scopeName();
+  const rankRows=D.mortality.filter(r=>r.Ano===yr && r[state.outcome]!=null && (state.region==='ALL'||r['Região']===state.region) && (state.capital==='ALL'||r.Capital===state.capital)).sort((a,b)=>b[state.outcome]-a[state.outcome]).slice(0,12).reverse();
   plot('overviewRanking',[{x:rankRows.map(r=>r[state.outcome]),y:rankRows.map(r=>r.Capital),type:'bar',orientation:'h',marker:{color:rankRows.map(r=>regionColors[r['Região']]||colors.teal)},text:rankRows.map(r=>f(r[state.outcome],1)),textposition:'outside',hovertemplate:'<b>%{y}</b><br>%{x:.2f}%<extra></extra>'}],{margin:{l:100,r:35,t:10,b:35},showlegend:false,xaxis:{title:`Taxa (%) · ${yr}`,gridcolor:'#edf2f6'}});
 
   const ageKeys=['20 a 29 anos','30 a 39 anos','40 a 49 anos','50 a 59 anos','60 a 69 anos','70 a 79 anos','80 anos e mais'];
@@ -134,7 +146,12 @@ function renderOverview(){
   const insights=[];
   if(peak.year===2020||peak.year===2021) insights.push(['strong','Pico concentrado em 2020–2021',`O maior valor do escopo selecionado foi ${f(peak.mean)}% em ${peak.year}. A coincidência temporal deve ser tratada como possível choque sistêmico, não como causalidade automática.`]);
   if(seg&&seg.post_p<.05) insights.push(['','Queda pós-2020 é estatisticamente detectável',`Inclinação pós-2020: ${pp(seg.post_slope,2)}/ano; IC95% ${f(seg.post_ci[0])} a ${f(seg.post_ci[1])}; p ${fp(seg.post_p)}.`]);
-  if(state.outcome==='80 anos e mais') insights.push(['warning','Idade muito elevada concentra risco hospitalar',`Em 2025, a média 80+ é ${f(D.key.age80_2025)}%, cerca de ${f(D.key.age_ratio_80_20_2025,1)}× a taxa de 20–29 anos.`]);
+  if(state.outcome==='80 anos e mais'){
+    const latestRows=scopedRows().filter(r=>r.Ano===yr);
+    const ageMean=k=>{const a=latestRows.map(r=>safe(r[k])).filter(v=>v!=null); return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;};
+    const older=ageMean('80 anos e mais'), young=ageMean('20 a 29 anos');
+    insights.push(['warning','Idade muito elevada concentra risco hospitalar',`Em ${yr}, a média 80+ no recorte é ${f(older)}%${young>0?', cerca de '+f(older/young,1)+'× a taxa de 20–29 anos':''}.`]);
+  }
   insights.push(['warning','Taxa hospitalar não é mortalidade populacional','O denominador é hospitalar. Mudanças na internação, gravidade, acesso e registro podem alterar a taxa mesmo sem mudança proporcional no risco populacional de morrer.']);
   $('#insightCards').innerHTML=insights.slice(0,4).map(([cl,t,tx])=>`<div class="insight ${cl}"><b>${t}</b><p>${tx}</p></div>`).join('');
 }
