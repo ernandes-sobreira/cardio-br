@@ -60,7 +60,7 @@
           <h1 id="pageTitle">Panorama nacional</h1>
         </div>
         <div class="top-actions">
-          <a class="ghost-link" href="#" data-download-health>Baixar CSV</a>
+          <a class="ghost-link" href="#" data-download-health="scope">Baixar CSV do filtro</a>
           <a class="primary-link" href="#methods" data-jump="methods">Método</a>
         </div>
       </header>
@@ -235,7 +235,7 @@
             </div>
           </article>
           <div class="download-grid">
-            <a href="#" data-download-health><b>Mortalidade 2008–2025</b><span>CSV · 486 registros</span></a>
+            <a href="#" data-download-health="all"><b>Mortalidade 2008–2025 · base completa</b><span>CSV · 486 registros</span></a>
             <a href="v3/data/pm25_capitais_anual_2008_2024.csv" download><b>PM2,5 anual — 27 capitais</b><span>CSV · 459 capital-anos</span></a>
             <a href="v3/data/pm25_capitais_diario_2008_2024.csv" download><b>PM2,5 diário — 27 capitais</b><span>CSV · 167.670 registros</span></a>
           </div>
@@ -253,10 +253,14 @@
     try{
       var d=window.CARDIOCLIMA_READY?await window.CARDIOCLIMA_READY:window.CARDIOCLIMA_DATA;
       var rows=d&&d.mortality; if(!rows||!rows.length) throw new Error('Base ainda não carregada');
-      var headers=Object.keys(rows[0]);
+       var mode=ev.target.closest('[data-download-health]')?.dataset.downloadHealth||'all';
+       var scope=window.CARDIOCLIMA_GET_FILTERS?window.CARDIOCLIMA_GET_FILTERS():{outcome:'Taxa mortalidade geral',capital:'ALL',region:'ALL'};
+       if(mode==='scope') rows=rows.filter(r=>(scope.capital==='ALL'||r.Capital===scope.capital)&&(scope.region==='ALL'||r['Região']===scope.region));
+       if(!rows.length) throw new Error('Sem dados no recorte selecionado');
+      var headers=mode==='all'?Object.keys(rows[0]):['Capital','UF','Região','Ano',scope.outcome].filter((v,i,a)=>a.indexOf(v)===i);
       var csv='\ufeff'+headers.map(csvEscape).join(',')+'\n'+rows.map(r=>headers.map(h=>csvEscape(r[h])).join(',')).join('\n');
       var url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-      var a=document.createElement('a'); a.href=url; a.download='mortalidade_capitais_2008_2025.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+      var a=document.createElement('a'); a.href=url; a.download=mode==='all'?'mortalidade_capitais_2008_2025_completo.csv':'cardioclima_filtro_2008_2025.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
     }catch(err){ alert('Não foi possível gerar o CSV agora: '+err.message); }
   }
   document.addEventListener('click',function(ev){ var a=ev.target.closest('[data-download-health]'); if(a) downloadHealth(ev); });
