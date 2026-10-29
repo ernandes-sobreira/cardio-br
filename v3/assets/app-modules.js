@@ -53,13 +53,13 @@ function renderTrends(){
   }
 
   const forestScope=$('#trendForestScope');
-  if(forestScope) forestScope.textContent=state.region==='ALL'?'27 CAPITAIS':`CAPITAIS · ${state.region.toUpperCase()}`;
+  if(forestScope) forestScope.textContent=state.capital!=='ALL'?`CAPITAL · ${state.capital.toUpperCase()}`:(state.region==='ALL'?'27 CAPITAIS':`CAPITAIS · ${state.region.toUpperCase()}`);
   renderSlopeForest();
   renderTrendTable();
 }
 function renderSlopeForest(){
   const items=Object.entries(D.analysis[state.outcome].capital_trends||{})
-    .filter(([capital,t])=>t&&t.n>=8&&(state.region==='ALL'||D.capitals[capital]?.region===state.region))
+    .filter(([capital,t])=>t&&t.n>=8&&(state.region==='ALL'||D.capitals[capital]?.region===state.region)&&(state.capital==='ALL'||capital===state.capital))
     .map(([capital,t])=>({capital,...t}))
     .sort((a,b)=>a.slope-b.slope);
   plot('slopeForest',[{
@@ -77,7 +77,7 @@ function renderSlopeForest(){
 function renderTrendTable(){
   const term=($('#trendSearch')?.value||'').toLowerCase();
   const rows=Object.entries(D.analysis[state.outcome].capital_trends||{})
-    .filter(([capital,t])=>t&&capital.toLowerCase().includes(term)&&(state.region==='ALL'||D.capitals[capital]?.region===state.region))
+    .filter(([capital,t])=>t&&capital.toLowerCase().includes(term)&&(state.region==='ALL'||D.capitals[capital]?.region===state.region)&&(state.capital==='ALL'||capital===state.capital))
     .map(([capital,t])=>({capital,...t}))
     .sort((a,b)=>a.apc-b.apc);
   $('#trendTableBody').innerHTML=rows.map(t=>`<tr><td><b>${t.capital}</b></td><td>${pct(t.apc,2)}</td><td>${pp(t.slope,3)}</td><td>${f(t.ci_low,3)} a ${f(t.ci_high,3)}</td><td>${fp(t.p)}</td><td>${fp(t.q_fdr)}</td><td>${pp(t.theil_sen,3)}</td><td><span class="status-pill ${classForTrend(t)==='up'?'up':classForTrend(t)==='down'?'down':'flat'}">${t.classificacao}</span></td></tr>`).join('');
@@ -89,10 +89,24 @@ function renderProfiles(){
   plot('ageProfile',ageTr,{yaxis:{title:'Taxa hospitalar (%)',gridcolor:'#edf2f6'},xaxis:{tickangle:-35,gridcolor:'rgba(0,0,0,0)'},legend:{orientation:'h',y:-.3}});
   const scope=scopedRows(); const sex=[]; const years=[...new Set(D.mortality.map(r=>r.Ano))].sort((a,b)=>a-b); ['Masc','Fem'].forEach((k,i)=>{const vals=years.map(year=>{const rr=scope.filter(r=>r.Ano===year&&r[k]!=null);return rr.length?rr.reduce((s,r)=>s+r[k],0)/rr.length:null;});sex.push({x:years,y:vals,mode:'lines+markers',name:outcomeLabel(k),line:{width:3,color:i?colors.violet:colors.teal},marker:{size:5}});});
   plot('sexTrend',sex,{yaxis:{title:'Taxa hospitalar (%)',gridcolor:'#edf2f6'},xaxis:{dtick:2,gridcolor:'#f1f4f7'}});
-  const regTr=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'].map(reg=>{const vals=years.map(year=>{const rr=D.mortality.filter(r=>r['Região']===reg&&r.Ano===year&&r[state.outcome]!=null);return rr.length?rr.reduce((s,r)=>s+r[state.outcome],0)/rr.length:null;});return {x:years,y:vals,mode:'lines',name:reg,line:{width:2.5,color:regionColors[reg]}};});
+  const allRegs=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'];
+  const selectedRegs=state.region==='ALL'?allRegs:[state.region];
+  const regTr=selectedRegs.map(reg=>{
+    const vals=years.map(year=>{const rr=D.mortality.filter(r=>r['Região']===reg&&r.Ano===year&&r[state.outcome]!=null);return rr.length?rr.reduce((n,r)=>n+r[state.outcome],0)/rr.length:null;});
+    return {x:years,y:vals,mode:'lines',name:reg+' (média das capitais)',line:{width:2.5,color:regionColors[reg]}};
+  });
+  if(state.capital!=='ALL'){
+    const capVals=years.map(year=>{const r=D.mortality.find(v=>v.Capital===state.capital&&v.Ano===year);return r?safe(r[state.outcome]):null;});
+    regTr.push({x:years,y:capVals,mode:'lines+markers',name:state.capital,line:{width:3,color:colors.navy},marker:{size:5}});
+  }
+  if($('#regionTrendTitle'))$('#regionTrendTitle').textContent=state.capital!=='ALL'?'Capital × média regional':(state.region==='ALL'?'Comparação entre regiões':'Trajetória · '+state.region);
   plot('regionTrend',regTr,{yaxis:{title:'Taxa hospitalar (%)',gridcolor:'#edf2f6'},xaxis:{dtick:2,gridcolor:'#f1f4f7'}});
-  const race=D.missingness.filter(d=>d.group==='Raça/cor').sort((a,b)=>a.coverage_pct-b.coverage_pct);
-  $('#raceWarning').innerHTML=`A completude varia fortemente: <b>${race[0].label}</b> tem apenas ${f(race[0].coverage_pct,1)}% de cobertura, enquanto <b>${race.at(-1).label}</b> chega a ${f(race.at(-1).coverage_pct,1)}%. Comparações de raça/cor devem ser secundárias e acompanhadas da cobertura.`;
+  const localRows=scopedRows();
+  const race=Object.entries(D.outcomes).filter(([,m])=>m.group==='Raça/cor').map(([k,m])=>{
+    const n=localRows.filter(r=>safe(r[k])!=null).length;
+    return {label:m.label,coverage_pct:localRows.length?100*n/localRows.length:0};
+  }).sort((a,b)=>a.coverage_pct-b.coverage_pct);
+  $('#raceWarning').innerHTML=`No recorte ${scopeName()}, <b>${race[0].label}</b> apresenta ${f(race[0].coverage_pct,1)}% de cobertura e <b>${race.at(-1).label}</b> ${f(race.at(-1).coverage_pct,1)}%. Indicadores de raça/cor requerem análise de completude antes de interpretações epidemiológicas.`;
   plot('raceCoverage',[{x:race.map(d=>d.coverage_pct),y:race.map(d=>d.label),type:'bar',orientation:'h',marker:{color:race.map(d=>d.coverage_pct<70?colors.amber:colors.teal)},text:race.map(d=>`${f(d.coverage_pct,1)}%`),textposition:'outside'}],{margin:{l:100,r:45,t:10,b:40},xaxis:{range:[0,105],title:'Cobertura (%)',gridcolor:'#edf2f6'},showlegend:false});
 }
 
@@ -137,6 +151,8 @@ function setupEnvControls(){
   run.addEventListener('click',()=>{
     state.envExposure=ex.value;
     state.envOutcome=oy.value;
+    if(D.outcomes[state.envOutcome]){state.outcome=state.envOutcome;$('#globalOutcome').value=state.outcome;}
+    updateContext();
     renderEnvironment();
     const meta=P.meta||{};
     $('#envRunStatus').innerHTML=`Análise recalculada: <b>${P.exposures[state.envExposure]}</b> × <b>${P.outcomes[state.envOutcome]?.label||state.envOutcome}</b> · ${meta.n_capitals||27} capitais · ${meta.period||'2008–2024'}.`;
@@ -157,7 +173,7 @@ function envMergedRows(xk,yk){
     const y=h?safe(h[yk]):null;
     const x=safe(pm[xk]);
     return {pm,h,x,y,Capital:pm.Capital,Ano:pm.Ano,Região:pm['Região']};
-  }).filter(r=>r.x!=null&&r.y!=null);
+  }).filter(r=>r.x!=null&&r.y!=null&&(state.capital==='ALL'||r.Capital===state.capital)&&(state.region==='ALL'||r.Região===state.region));
 }
 
 function renderEnvironment(){
@@ -171,16 +187,25 @@ function renderEnvironment(){
   const exposureLabel=P.exposures[xk]||xk;
   const outcomeMeta=P.outcomes[yk]||{label:yk,group:'Outro'};
   const rows=envMergedRows(xk,yk);
-  const st=P.stats?.[xk]?.outcomes?.[yk];
+  const national=state.capital==='ALL'&&state.region==='ALL';
+  const st=national?P.stats?.[xk]?.outcomes?.[yk]:null;
   const fe=st?.fixed_effects?.full;
   const sens=st?.fixed_effects?.exclude_2020_2021;
   const diff=st?.fixed_effects?.first_difference;
   const scale=envScaleInfo(xk);
 
-  if(!rows.length||!st){
-    $('#envMetrics').innerHTML='<div class="metric-block">Não há observações suficientes para esta combinação.</div>';
+  if(!rows.length){
+    $('#envMetrics').innerHTML='<div class="metric-block">Não há observações suficientes neste recorte.</div>';
+    $('#envPanelSummaryBody').innerHTML='<p>Altere o indicador ou o recorte geográfico.</p>';
+    $('#envScatterTitle').textContent='PM2,5 × saúde · sem dados';
+    $('#envSig').textContent='sem dados';
+    $('#envPanelSig').textContent='—';
+    ['envScatter','envRegionTrend','envCapitalRanking'].forEach(id=>plot(id,[],{}));
     return;
   }
+  $('#envRunStatus').textContent=`${scopeName()} · ${exposureLabel} × ${outcomeMeta.label} · 2008–2024 · ${national?'modelo nacional':'visualização descritiva do recorte'}.`;
+  if($('#envScatterScope'))$('#envScatterScope').textContent=national?'27 CAPITAIS · 2008–2024':`RECORTE · ${scopeName().toUpperCase()}`;
+  if($('#envRankScope'))$('#envRankScope').textContent=national?'27 CAPITAIS · 2024':`RECORTE · ${scopeName().toUpperCase()}`;
 
   const regions=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'];
   const traces=regions.map(reg=>{
@@ -199,14 +224,15 @@ function renderEnvironment(){
 
   const lf=linearFit(rows.map(r=>r.x),rows.map(r=>r.y));
   const xmin=Math.min(...rows.map(r=>r.x)), xmax=Math.max(...rows.map(r=>r.x));
-  traces.push({
+  if(rows.length>2&&xmin!==xmax) traces.push({
     x:[xmin,xmax],y:[lf.intercept+lf.slope*xmin,lf.intercept+lf.slope*xmax],
-    mode:'lines',name:'OLS bruta',line:{color:colors.navy,width:2,dash:'dash'},hoverinfo:'skip'
+    mode:'lines',name:'OLS bruta · descritiva',line:{color:colors.navy,width:2,dash:'dash'},hoverinfo:'skip'
   });
 
   $('#envScatterTitle').textContent=`${exposureLabel} × ${outcomeMeta.label}`;
   const sig=$('#envSig');
-  if(fe){
+  if(!national){ sig.textContent='recorte descritivo'; sig.style.background='#f2f5f8'; sig.style.color='#647486'; }
+  else if(fe){
     sig.textContent=fe.p<.05?'efeito fixo: p < 0,05':'efeito fixo: p ≥ 0,05';
     sig.style.background=fe.p<.05?'#e8f8f1':'#f2f5f8';
     sig.style.color=fe.p<.05?'#176c49':'#647486';
@@ -222,33 +248,35 @@ function renderEnvironment(){
 
   const coefText=fe?pp(fe.coef*scale.scale,2):'—';
   const ciText=fe?`${f(fe.ci_low*scale.scale,2)} a ${f(fe.ci_high*scale.scale,2)}`:'—';
+  if(national){
   $('#envMetrics').innerHTML=`
     <div class="metric-block emphasis"><span>Efeitos fixos</span><strong>${coefText}</strong><small>${scale.label} · IC95% ${ciText} · p ${fe?fp(fe.p):'—'}</small></div>
     <div class="metric-block"><span>Cobertura</span><strong>${st.capitals} capitais</strong><small>${st.n} capital-anos com dados do grupo selecionado</small></div>
     <div class="metric-block"><span>Pearson bruto</span><strong>r = ${f(st.pearson?.r,3)}</strong><small>p ${fp(st.pearson?.p)} · não controla diferenças entre capitais/anos</small></div>
     <div class="metric-block"><span>Spearman bruto</span><strong>ρ = ${f(st.spearman?.rho,3)}</strong><small>p ${fp(st.spearman?.p)} · associação monotônica descritiva</small></div>
     <div class="metric-block"><span>R² do modelo FE</span><strong>${fe?f(fe.r2,3):'—'}</strong><small>efeitos fixos de capital + ano; SE agrupado por capital</small></div>`;
+  } else {
+    $('#envMetrics').innerHTML='<div class="metric-block emphasis"><span>Escopo escolhido</span><strong>'+scopeName()+'</strong><small>2008–2024 · dados filtrados de PM2,5 e saúde</small></div>'
+      +'<div class="metric-block"><span>Observações</span><strong>'+rows.length+' capital-anos</strong><small>'+new Set(rows.map(r=>r.Capital)).size+' capital(is) com pares de dados</small></div>'
+      +'<div class="metric-block"><span>Inferência estatística</span><strong>Não calculada</strong><small>Os modelos de efeitos fixos disponíveis são nacionais. Não se deve exibir seus coeficientes como estimativas locais.</small></div>';
+  }
 
-  // Tendência ambiental por região
-  const years=[...new Set(P.annual.map(r=>r.Ano))].sort((a,b)=>a-b);
-  const regTr=regions.map(reg=>{
-    const y=years.map(year=>{
-      const vals=P.annual.filter(r=>r.Região===reg&&r.Ano===year&&r[xk]!=null).map(r=>+r[xk]);
-      return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
-    });
-    return {x:years,y,mode:'lines+markers',name:reg,line:{width:2.5,color:regionColors[reg]},marker:{size:4}};
-  });
-  plot('envRegionTrend',regTr,{
-    xaxis:{dtick:2,gridcolor:'#edf2f6'},
-    yaxis:{title:exposureLabel,gridcolor:'#edf2f6'},
-    legend:{orientation:'h',y:-.24}
-  });
+  // Tendência ambiental no recorte geográfico, sem atribuir médias de outras áreas.
+  const annualScope=P.annual.filter(r=>(state.capital==='ALL'||r.Capital===state.capital)&&(state.region==='ALL'||r.Região===state.region));
+  const years=[...new Set(annualScope.map(r=>r.Ano))].sort((a,b)=>a-b);
+  const regTr=state.capital!=='ALL'
+    ? [{x:years,y:years.map(year=>{const r=annualScope.find(v=>v.Ano===year);return r?safe(r[xk]):null;}),mode:'lines+markers',name:state.capital,line:{width:2.5,color:colors.teal},marker:{size:4}}]
+    : regions.filter(reg=>state.region==='ALL'||reg===state.region).map(reg=>{
+        const y=years.map(year=>{const vals=annualScope.filter(r=>r.Região===reg&&r.Ano===year&&r[xk]!=null).map(r=>+r[xk]);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;});
+        return {x:years,y,mode:'lines+markers',name:reg,line:{width:2.5,color:regionColors[reg]},marker:{size:4}};
+      });
+  plot('envRegionTrend',regTr,{xaxis:{dtick:2,gridcolor:'#edf2f6'},yaxis:{title:exposureLabel,gridcolor:'#edf2f6'},legend:{orientation:'h',y:-.24}});
 
   // Ranking mais recente completo
   const latest=Math.max(...P.annual.map(r=>r.Ano));
-  const rank=P.annual.filter(r=>r.Ano===latest&&r[xk]!=null)
+  const rank=annualScope.filter(r=>r.Ano===latest&&r[xk]!=null)
     .sort((a,b)=>a[xk]-b[xk]);
-  $('#envRankingTitle').textContent=`Ranking da exposição · ${latest}`;
+  $('#envRankingTitle').textContent=state.capital==='ALL'?`Ranking da exposição · ${latest} · ${scopeName()}`:`Exposição em ${state.capital} · ${latest}`;
   plot('envCapitalRanking',[{
     x:rank.map(r=>r[xk]),y:rank.map(r=>r.Capital),type:'bar',orientation:'h',
     marker:{color:rank.map(r=>regionColors[r.Região]||colors.teal)},
@@ -259,6 +287,7 @@ function renderEnvironment(){
     xaxis:{title:exposureLabel,gridcolor:'#edf2f6'},yaxis:{gridcolor:'rgba(0,0,0,0)'},showlegend:false
   });
 
+  if(national){
   $('#envPanelSummaryTitle').textContent=`${outcomeMeta.label} · efeitos fixos de capital e ano`;
   const psig=$('#envPanelSig');
   psig.textContent=fe?(fe.p<.05?'p < 0,05':'p ≥ 0,05'):'—';
@@ -272,10 +301,19 @@ function renderEnvironment(){
     <div class="model-row"><div><b>Primeira diferença</b><span>mudanças anuais dentro de cada capital</span></div><span class="model-value">${diff?pp(diff.coef*scale.scale,2)+' · p '+fp(diff.p):'—'}</span></div>
     <div class="model-row"><div><b>Amostra efetiva</b><span>a cobertura do desfecho pode variar entre grupos</span></div><span class="model-value">${st.n} observações · ${st.capitals} capitais</span></div>`;
 
-  $('#envCaveat').textContent=`A exposição ambiental agora usa uma única fonte para as 27 capitais: reanálise CAMS/EAC4 agregada aos limites municipais, com dados diários de 2008 a 2024. As correlações brutas são descritivas. O modelo longitudinal controla diferenças fixas entre capitais e choques comuns de cada ano, com erros-padrão agrupados por capital. Ainda assim, esta é uma análise ecológica e não estabelece causalidade individual. Para raça/cor e grupos com menor completude, a amostra efetiva aparece explicitamente na tela.`;
+  } else {
+    $('#envPanelSummaryTitle').textContent='Modelo nacional não aplicável a '+scopeName();
+    $('#envPanelSig').textContent='não estimado';
+    $('#envPanelSig').style.background='#f2f5f8';
+    $('#envPanelSig').style.color='#647486';
+    $('#envPanelSummaryBody').innerHTML='<div class="model-row"><div><b>Recorte '+scopeName()+'</b><span>Os dados e gráficos descritivos respondem aos filtros. Os modelos longitudinais atualmente disponibilizados foram ajustados apenas para as 27 capitais em conjunto.</span></div><span class="model-value">—</span></div>'
+      +'<div class="model-row"><div><b>Inferência</b><span>Uma estimativa local ou regional requer novo ajuste com amostra, intervalos e erros-padrão apropriados; não reutilizar coeficientes nacionais.</span></div><span class="model-value">não calculada</span></div>';
+  }
+  $('#envCaveat').textContent=national?'Análise nacional: PM2,5 CAMS/EAC4 (2008–2024), correlações descritivas e painel longitudinal com efeitos fixos de capital e ano. É ecológica e não permite inferência causal individual.':'Recorte '+scopeName()+': dados descritivos de PM2,5 e mortalidade hospitalar. Coeficientes, p-valores e intervalos de confiança de um modelo nacional não devem ser interpretados como resultados deste recorte. Para uma inferência local, é necessário ajustar modelo específico.';
 }
 
 function renderModels(){
+  const n=$('#modelScopeNotice'); if(n) n.textContent=`Esta aba exibe modelos nacionais pré-calculados para desfechos específicos; eles NÃO acompanham o recorte ${scopeName()} nem necessariamente o indicador ${outcomeLabel(state.outcome)}. Para resultados filtrados, utilize Panorama ou Tendências.`;
   const keys=['Taxa mortalidade geral','Masc','Fem','60 a 69 anos','70 a 79 anos','80 anos e mais']; const realKeys=keys.filter(k=>D.analysis[k].segmented_2020);
   const pre=realKeys.map(k=>D.analysis[k].segmented_2020), post=pre;
   plot('segmentedForest',[
@@ -565,12 +603,12 @@ function renderQuality(){
 }
 
 function renderPage(p){ if(p==='overview')renderOverview(); if(p==='trends')renderTrends(); if(p==='profiles')renderProfiles(); if(p==='environment')renderEnvironment(); if(p==='models')renderModels(); if(p==='quality')renderQuality(); }
-function renderAll(){ updateContext(); renderOverview(); if(state.page!=='overview')renderPage(state.page); }
+function renderAll(){ updateContext(); renderPage(state.page); }
 
 function init(){
   populateOutcomeSelect(); populateRegions(); populateCapitals(); setupNav(); setupFilters(); setupEnvControls();
   $('#trendSearch').addEventListener('input',renderTrendTable);
-  updateContext(); renderOverview(); renderTrends(); renderProfiles(); renderEnvironment(); renderModels(); renderQuality();
+  updateContext(); renderOverview();
   window.addEventListener('resize',()=>{window.Plotly&&$$('.page.active .js-plotly-plot').forEach(el=>Plotly.Plots.resize(el));});
 }
 async function boot(){
