@@ -79,7 +79,7 @@ function setupNav(){
   $$('[data-jump]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goPage(a.dataset.jump);}));
   $('#mobileMenu').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
 }
-function goPage(page){ state.page=page; $('.page').forEach(p=>p.classList.remove('active')); $(`#page-${page}`).classList.add('active'); $('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page)); updateContext(); $('#sidebar').classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); setTimeout(()=>{renderPage(page); window.Plotly&&$(`#page-${page} .js-plotly-plot`).forEach(el=>Plotly.Plots.resize(el));},40); }
+function goPage(page){ state.page=page; $$('.page').forEach(p=>p.classList.remove('active')); $(`#page-${page}`).classList.add('active'); $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page)); updateContext(); $('#sidebar').classList.remove('open'); window.scrollTo({top:0,behavior:'smooth'}); setTimeout(()=>{renderPage(page); window.Plotly&&$$(`#page-${page} .js-plotly-plot`).forEach(el=>Plotly.Plots.resize(el));},40); }
 function setupFilters(){
   $('#globalOutcome').addEventListener('change',e=>{state.outcome=e.target.value; const P=window.CARDIOCLIMA_PM25_ALL; if(P?.outcomes?.[state.outcome]){state.envOutcome=state.outcome; if($('#envOutcome'))$('#envOutcome').value=state.outcome;} renderAll();});
   $('#globalRegion').addEventListener('change',e=>{state.region=e.target.value; populateCapitals();renderAll();});
